@@ -1,0 +1,6 @@
+@quantity_move_api_HostAddress = http://localhost:5271
+
+GET {{quantity_move_api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
