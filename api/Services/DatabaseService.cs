@@ -24,7 +24,7 @@ public class DatabaseService : IDatabaseService
         _logger = logger;
     }
 
-    private IDbConnection CreateConnection()
+    private SqlConnection CreateConnection()
     {
         return new SqlConnection(_connectionString);
     }

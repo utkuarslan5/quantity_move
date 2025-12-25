@@ -40,6 +40,9 @@ builder.Services.AddAuthorization();
 // Register services
 builder.Services.AddScoped<IDatabaseService, DatabaseService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IStockService, StockService>();
+builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<IQuantityService, QuantityService>();
 
 var app = builder.Build();
 

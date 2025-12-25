@@ -9,11 +9,3 @@ public class MoveQuantityResponse
     public int? RowsAffected { get; set; }
 }
 
-public class ValidateStockResponse
-{
-    public bool IsValid { get; set; }
-    public string? Message { get; set; }
-    public decimal? AvailableQuantity { get; set; }
-    public int? ReturnCode { get; set; }
-}
-
