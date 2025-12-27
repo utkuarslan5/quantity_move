@@ -1,0 +1,103 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using quantity_move_api.Services;
+using quantity_move_api.Services.Stock;
+using quantity_move_api.Services.Quantity;
+using quantity_move_api.Services.Fifo;
+using quantity_move_api.Services.Barcode;
+using quantity_move_api.Services.Composition;
+using quantity_move_api.Middleware;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Configure JWT Authentication
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is not configured");
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
+builder.Services.AddAuthorization();
+
+// Register core services
+builder.Services.AddScoped<IDatabaseService, DatabaseService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
+builder.Services.AddScoped<quantity_move_api.Services.Query.IQueryService, quantity_move_api.Services.Query.QueryService>();
+
+// Register repositories
+builder.Services.AddScoped<quantity_move_api.Repositories.ILotLocationRepository, quantity_move_api.Repositories.LotLocationRepository>();
+builder.Services.AddScoped<quantity_move_api.Repositories.IItemRepository, quantity_move_api.Repositories.ItemRepository>();
+builder.Services.AddScoped<quantity_move_api.Repositories.ILocationRepository, quantity_move_api.Repositories.LocationRepository>();
+
+// Register modular stock services
+builder.Services.AddScoped<IStockQueryService, StockQueryService>();
+builder.Services.AddScoped<IStockValidationService, StockValidationService>();
+builder.Services.AddScoped<IStockLocationService, StockLocationService>();
+
+// Register modular quantity services
+builder.Services.AddScoped<IQuantityMoveService, QuantityMoveService>();
+builder.Services.AddScoped<IQuantityValidationService, QuantityValidationService>();
+
+// Register FIFO service
+builder.Services.AddScoped<IFifoService, FifoService>();
+
+// Register barcode service
+builder.Services.AddScoped<IBarcodeService, BarcodeService>();
+
+// Register composition service
+builder.Services.AddScoped<IStockOperationService, StockOperationService>();
+
+// Keep legacy services for backward compatibility (can be removed later)
+builder.Services.AddScoped<IStockService, StockService>();
+builder.Services.AddScoped<IQuantityService, QuantityService>();
+
+var app = builder.Build();
+
+// Configure path base for /api
+app.UsePathBase(new PathString("/api"));
+
+// Configure the HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+
+// Global exception handling
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
+
+// Make Program class accessible for integration tests
+public partial class Program { }
