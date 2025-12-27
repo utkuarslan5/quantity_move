@@ -53,16 +53,10 @@ public class StockOperationService : BaseService<StockOperationService>, IStockO
         }
 
         // 3. Validate source stock
-        // #region agent log
-        System.IO.File.AppendAllText("/home/r00t/code/ekip/quantity_move/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { id = $"log_{System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}_{System.Guid.NewGuid():N}", timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), location = "StockOperationService.cs:56", message = "Before GetDefaultWarehouse", data = new { requestWarehouseCode = request.WarehouseCode, requestWarehouseCodeIsNull = request.WarehouseCode == null }, sessionId = "debug-session", runId = "run1", hypothesisId = "A" }) + "\n");
-        // #endregion
         var warehouseCode = GetDefaultWarehouse(request.WarehouseCode);
-        // #region agent log
-        System.IO.File.AppendAllText("/home/r00t/code/ekip/quantity_move/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { id = $"log_{System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}_{System.Guid.NewGuid():N}", timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), location = "StockOperationService.cs:58", message = "After GetDefaultWarehouse", data = new { warehouseCode = warehouseCode, warehouseCodeIsNull = warehouseCode == null }, sessionId = "debug-session", runId = "run1", hypothesisId = "B" }) + "\n");
-        // #endregion
         var sourceValidation = await _validationService.ValidateStockAvailabilityAsync(
             request.ItemCode, request.SourceLotNumber, request.SourceLocation, 
-            request.Quantity, warehouseCode).ConfigureAwait(false);
+            request.Quantity, warehouseCode!).ConfigureAwait(false);
         if (!sourceValidation.IsAvailable)
         {
             return new MoveQuantityResponse
@@ -88,11 +82,8 @@ public class StockOperationService : BaseService<StockOperationService>, IStockO
         // 5. Check FIFO if requested
         if (options.ValidateFifo)
         {
-            // #region agent log
-            System.IO.File.AppendAllText("/home/r00t/code/ekip/quantity_move/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { id = $"log_{System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}_{System.Guid.NewGuid():N}", timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), location = "StockOperationService.cs:91", message = "Before ValidateFifoComplianceAsync", data = new { requestWarehouseCode = request.WarehouseCode, requestWarehouseCodeIsNull = request.WarehouseCode == null, warehouseCode = warehouseCode, warehouseCodeIsNull = warehouseCode == null, usingWarehouseCode = true }, sessionId = "debug-session", runId = "post-fix", hypothesisId = "C" }) + "\n");
-            // #endregion
             var fifoValidation = await _fifoService.ValidateFifoComplianceAsync(
-                request.ItemCode, request.SourceLotNumber, warehouseCode, request.SiteReference);
+                request.ItemCode, request.SourceLotNumber, warehouseCode!, request.SiteReference);
         if (!fifoValidation.IsCompliant && !string.IsNullOrEmpty(fifoValidation.WarningMessage))
         {
             Logger.LogWarning("FIFO violation detected: {WarningMessage}", fifoValidation.WarningMessage);

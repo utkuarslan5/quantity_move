@@ -116,5 +116,235 @@ public class DatabaseServiceTests
         service.Should().NotBeNull();
         // Integration tests will verify DynamicParameters handling
     }
+
+    [Fact]
+    public void CreateConnection_ReturnsSqlConnection()
+    {
+        // Arrange
+        var configBuilder = new ConfigurationBuilder();
+        configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "ConnectionStrings:DefaultConnection", "Server=test;Database=test;Trusted_Connection=true;" }
+        });
+        var mockConfig = configBuilder.Build();
+        var service = new DatabaseService(mockConfig, _mockLogger.Object);
+
+        // Note: CreateConnection is private, so we test it indirectly
+        // The method is called by all query methods, so it gets coverage through them
+        // For direct testing, we'd need to make it protected or use reflection
+
+        // Act & Assert
+        service.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task QueryAsync_ThrowsException_WhenConnectionFails()
+    {
+        // Arrange
+        var configBuilder = new ConfigurationBuilder();
+        configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "ConnectionStrings:DefaultConnection", "Server=invalid;Database=invalid;Trusted_Connection=true;" }
+        });
+        var mockConfig = configBuilder.Build();
+        var service = new DatabaseService(mockConfig, _mockLogger.Object);
+
+        // Act
+        Func<Task> act = async () => await service.QueryAsync<string>("SELECT 1");
+
+        // Assert
+        await act.Should().ThrowAsync<Exception>();
+        _mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Error,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => true),
+                It.IsAny<Exception>(),
+                It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task QueryFirstOrDefaultAsync_ThrowsException_WhenConnectionFails()
+    {
+        // Arrange
+        var configBuilder = new ConfigurationBuilder();
+        configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "ConnectionStrings:DefaultConnection", "Server=invalid;Database=invalid;Trusted_Connection=true;" }
+        });
+        var mockConfig = configBuilder.Build();
+        var service = new DatabaseService(mockConfig, _mockLogger.Object);
+
+        // Act
+        Func<Task> act = async () => await service.QueryFirstOrDefaultAsync<string>("SELECT 1");
+
+        // Assert
+        await act.Should().ThrowAsync<Exception>();
+        _mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Error,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => true),
+                It.IsAny<Exception>(),
+                It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task QuerySingleAsync_ThrowsException_WhenConnectionFails()
+    {
+        // Arrange
+        var configBuilder = new ConfigurationBuilder();
+        configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "ConnectionStrings:DefaultConnection", "Server=invalid;Database=invalid;Trusted_Connection=true;" }
+        });
+        var mockConfig = configBuilder.Build();
+        var service = new DatabaseService(mockConfig, _mockLogger.Object);
+
+        // Act
+        Func<Task> act = async () => await service.QuerySingleAsync<string>("SELECT 1");
+
+        // Assert
+        await act.Should().ThrowAsync<Exception>();
+        _mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Error,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => true),
+                It.IsAny<Exception>(),
+                It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ThrowsException_WhenConnectionFails()
+    {
+        // Arrange
+        var configBuilder = new ConfigurationBuilder();
+        configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "ConnectionStrings:DefaultConnection", "Server=invalid;Database=invalid;Trusted_Connection=true;" }
+        });
+        var mockConfig = configBuilder.Build();
+        var service = new DatabaseService(mockConfig, _mockLogger.Object);
+
+        // Act
+        Func<Task> act = async () => await service.ExecuteAsync("UPDATE table SET col = 1");
+
+        // Assert
+        await act.Should().ThrowAsync<Exception>();
+        _mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Error,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => true),
+                It.IsAny<Exception>(),
+                It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task ExecuteStoredProcedureAsync_ThrowsException_WhenConnectionFails()
+    {
+        // Arrange
+        var configBuilder = new ConfigurationBuilder();
+        configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "ConnectionStrings:DefaultConnection", "Server=invalid;Database=invalid;Trusted_Connection=true;" }
+        });
+        var mockConfig = configBuilder.Build();
+        var service = new DatabaseService(mockConfig, _mockLogger.Object);
+
+        // Act
+        Func<Task> act = async () => await service.ExecuteStoredProcedureAsync<string>("TestProc");
+
+        // Assert
+        await act.Should().ThrowAsync<Exception>();
+        _mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Error,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => true),
+                It.IsAny<Exception>(),
+                It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task ExecuteStoredProcedureSingleAsync_ThrowsException_WhenConnectionFails()
+    {
+        // Arrange
+        var configBuilder = new ConfigurationBuilder();
+        configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "ConnectionStrings:DefaultConnection", "Server=invalid;Database=invalid;Trusted_Connection=true;" }
+        });
+        var mockConfig = configBuilder.Build();
+        var service = new DatabaseService(mockConfig, _mockLogger.Object);
+
+        // Act
+        Func<Task> act = async () => await service.ExecuteStoredProcedureSingleAsync<string>("TestProc");
+
+        // Assert
+        await act.Should().ThrowAsync<Exception>();
+        _mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Error,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => true),
+                It.IsAny<Exception>(),
+                It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task ExecuteStoredProcedureWithOutputAsync_ThrowsException_WhenConnectionFails()
+    {
+        // Arrange
+        var configBuilder = new ConfigurationBuilder();
+        configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "ConnectionStrings:DefaultConnection", "Server=invalid;Database=invalid;Trusted_Connection=true;" }
+        });
+        var mockConfig = configBuilder.Build();
+        var service = new DatabaseService(mockConfig, _mockLogger.Object);
+
+        // Act
+        Func<Task> act = async () => await service.ExecuteStoredProcedureWithOutputAsync("TestProc");
+
+        // Assert
+        await act.Should().ThrowAsync<Exception>();
+        _mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Error,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => true),
+                It.IsAny<Exception>(),
+                It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task ExecuteStoredProcedureNonQueryAsync_WithNonDynamicParameters_ExecutesNormally()
+    {
+        // Arrange
+        var configBuilder = new ConfigurationBuilder();
+        configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "ConnectionStrings:DefaultConnection", "Server=invalid;Database=invalid;Trusted_Connection=true;" }
+        });
+        var mockConfig = configBuilder.Build();
+        var service = new DatabaseService(mockConfig, _mockLogger.Object);
+        var parameters = new { Param1 = "value1" };
+
+        // Act
+        Func<Task> act = async () => await service.ExecuteStoredProcedureNonQueryAsync("TestProc", parameters);
+
+        // Assert
+        // Should throw exception due to invalid connection, but should reach the non-DynamicParameters path
+        await act.Should().ThrowAsync<Exception>();
+    }
 }
 

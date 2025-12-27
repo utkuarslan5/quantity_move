@@ -116,18 +116,6 @@ public static class TestHelpers
         };
     }
 
-    public static ValidateLocationResponse CreateValidateLocationResponse(
-        bool isValid = true,
-        string locationCode = "LOC001")
-    {
-        return new ValidateLocationResponse
-        {
-            IsValid = isValid,
-            LocationCode = locationCode,
-            LocationDescription = isValid ? "Test Location" : null,
-            Message = isValid ? null : "Location not found"
-        };
-    }
 
     public static StockLookupResponse CreateStockLookupResponse()
     {
