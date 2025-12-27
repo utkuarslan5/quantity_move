@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="General_Ws">
+</Property><Property Name="Solution File" Value="C:\Users\IOnel\Desktop\General_Ws\General_Ws.sln">
+</Property><Property Name="User Options File" Value="C:\Users\IOnel\Desktop\General_Ws\General_Ws.suo">
+</Property><Property Name="Date" Value="17 Mart 2011 Perşembe">
+</Property><Property Name="Time" Value="10:23">
+</Property></Properties><Event ErrorLevel="0" Project="" Source="General_Ws.sln" Description="File successfully backed up as C:\Users\IOnel\Desktop\General_Ws\Backup\General_Ws.sln">
+</Event><Event ErrorLevel="0" Project="" Source="General_Ws.suo" Description="File successfully backed up as C:\Users\IOnel\Desktop\General_Ws\Backup\General_Ws.suo">
+</Event><Event ErrorLevel="1" Project="General_Ws" Source="http://localhost/General_Ws" Description="Warning: The project file is being backed up to a relative path that differs from the original solution relative path.  The difference in folder hierarchy may create problems in opening or building the backed up solution and project.">
+</Event><Event ErrorLevel="2" Project="http://localhost/General_Ws" Source="http://localhost/General_Ws" Description="ERROR: Failed to back up Web site http://localhost/General_Ws">
+</Event><Event ErrorLevel="0" Project="Core" Source="Core\Core.vbproj" Description="Project file successfully backed up as C:\Users\IOnel\Desktop\General_Ws\Backup\Core\Core.vbproj">
+</Event><Event ErrorLevel="0" Project="Core" Source="Core\Core.vbproj.user" Description="Project user file successfully backed up as C:\Users\IOnel\Desktop\General_Ws\Backup\Core\Core.vbproj.user">
+</Event><Event ErrorLevel="0" Project="Core" Source="Core\AssemblyInfo.vb" Description="File successfully backed up as C:\Users\IOnel\Desktop\General_Ws\Backup\Core\AssemblyInfo.vb">
+</Event><Event ErrorLevel="0" Project="Core" Source="Core\ComponentsCore.vb" Description="File successfully backed up as C:\Users\IOnel\Desktop\General_Ws\Backup\Core\ComponentsCore.vb">
+</Event><Event ErrorLevel="0" Project="Core" Source="Core\DbCoreForDB2.vb" Description="File successfully backed up as C:\Users\IOnel\Desktop\General_Ws\Backup\Core\DbCoreForDB2.vb">
+</Event><Event ErrorLevel="0" Project="Core" Source="Core\DbCore.vb" Description="File successfully backed up as C:\Users\IOnel\Desktop\General_Ws\Backup\Core\DbCore.vb">
+</Event><Event ErrorLevel="0" Project="Core" Source="Core\DbCoreGeneral.vb" Description="File successfully backed up as C:\Users\IOnel\Desktop\General_Ws\Backup\Core\DbCoreGeneral.vb">
+</Event><Event ErrorLevel="0" Project="Core" Source="Core\Interfaces.vb" Description="File successfully backed up as C:\Users\IOnel\Desktop\General_Ws\Backup\Core\Interfaces.vb">
+</Event><Event ErrorLevel="0" Project="Core" Source="Core\OlayYonetici.vb" Description="File successfully backed up as C:\Users\IOnel\Desktop\General_Ws\Backup\Core\OlayYonetici.vb">
+</Event><Event ErrorLevel="0" Project="Core" Source="Core\ReturnValue.vb" Description="File successfully backed up as C:\Users\IOnel\Desktop\General_Ws\Backup\Core\ReturnValue.vb">
+</Event><Event ErrorLevel="0" Project="Core" Source="Core\AsVol_DB_Core.snk" Description="File successfully backed up as C:\Users\IOnel\Desktop\General_Ws\Backup\Core\AsVol_DB_Core.snk">
+</Event><Event ErrorLevel="0" Project="Core" Source="Core\Core.vbproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="Core" Source="Core\Core.vbproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="" Source="General_Ws.sln" Description="Solution converted successfully">
+</Event><Event ErrorLevel="3" Project="" Source="General_Ws.sln" Description="Converted">
+</Event><Event ErrorLevel="0" Project="Core" Source="Core\Core.vbproj" Description="Scan complete: Upgrade not required for project files.">
+</Event></UpgradeLog>

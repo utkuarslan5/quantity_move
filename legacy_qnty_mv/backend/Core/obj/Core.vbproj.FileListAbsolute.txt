@@ -1,0 +1,43 @@
+D:\PROJECTS\APPLICATONS\WINDOWS\ETI MÜŞTERİ BAĞIMSIZ FATURA\Core\bin\Core.dll
+D:\PROJECTS\APPLICATONS\WINDOWS\ETI MÜŞTERİ BAĞIMSIZ FATURA\Core\bin\Core.pdb
+D:\PROJECTS\APPLICATONS\WINDOWS\ETI MÜŞTERİ BAĞIMSIZ FATURA\Core\bin\Core.xml
+D:\PROJECTS\APPLICATONS\WINDOWS\ETI MÜŞTERİ BAĞIMSIZ FATURA\Core\obj\Debug\ResolveAssemblyReference.cache
+D:\PROJECTS\APPLICATONS\WINDOWS\ETI MÜŞTERİ BAĞIMSIZ FATURA\Core\obj\Debug\Core.dll
+D:\PROJECTS\APPLICATONS\WINDOWS\ETI MÜŞTERİ BAĞIMSIZ FATURA\Core\obj\Debug\Core.xml
+D:\PROJECTS\APPLICATONS\WINDOWS\ETI MÜŞTERİ BAĞIMSIZ FATURA\Core\obj\Debug\Core.pdb
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\bin\Core.dll
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\bin\Core.pdb
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\bin\Core.xml
+J:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\obj\Debug\ResolveAssemblyReference.cache
+J:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\obj\Debug\Core.xml
+J:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\obj\Debug\Core.pdb
+J:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\bin\Debug\Core.dll
+J:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\bin\Debug\Core.pdb
+J:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\bin\Debug\Core.xml
+J:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\obj\Debug\Core.dll
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\bin\Debug\Core.dll
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\bin\Debug\Core.pdb
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\bin\Debug\Core.xml
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\obj\Debug\ResolveAssemblyReference.cache
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\obj\Debug\Core.dll
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\obj\Debug\Core.xml
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWS\Core\obj\Debug\Core.pdb
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWMS\Core\bin\Debug\Core.dll
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWMS\Core\bin\Debug\Core.pdb
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWMS\Core\bin\Debug\Core.xml
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWMS\Core\obj\Debug\ResolveAssemblyReference.cache
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWMS\Core\obj\Debug\Core.dll
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWMS\Core\obj\Debug\Core.xml
+D:\PROJECTS\APPLICATONS\WINDOWS\PERFETTI - PWMS\Core\obj\Debug\Core.pdb
+C:\Documents and Settings\Administrator\Desktop\Core\obj\Release\ResolveAssemblyReference.cache
+C:\Documents and Settings\Administrator\Desktop\Core\obj\Release\Core.dll
+C:\Documents and Settings\Administrator\Desktop\Core\obj\Release\Core.xml
+C:\Documents and Settings\Administrator\Desktop\Core\bin\Core.dll
+C:\Documents and Settings\Administrator\Desktop\Core\bin\Core.xml
+D:\PROJECTS\APPLICATONS\WEB\General_Ws\Core\bin\Debug\Core.dll
+D:\PROJECTS\APPLICATONS\WEB\General_Ws\Core\bin\Debug\Core.pdb
+D:\PROJECTS\APPLICATONS\WEB\General_Ws\Core\bin\Debug\Core.xml
+D:\PROJECTS\APPLICATONS\WEB\General_Ws\Core\obj\Debug\ResolveAssemblyReference.cache
+D:\PROJECTS\APPLICATONS\WEB\General_Ws\Core\obj\Debug\Core.dll
+D:\PROJECTS\APPLICATONS\WEB\General_Ws\Core\obj\Debug\Core.xml
+D:\PROJECTS\APPLICATONS\WEB\General_Ws\Core\obj\Debug\Core.pdb

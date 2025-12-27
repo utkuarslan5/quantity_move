@@ -7,3 +7,5 @@ public interface IStockService
     Task<StockLookupResponse> GetStockAsync(StockLookupRequest request);
 }
 
+
+

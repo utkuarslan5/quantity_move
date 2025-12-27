@@ -7,3 +7,5 @@ public interface IQuantityService
     Task<MoveQuantityResponse> MoveQuantityAsync(MoveQuantityRequest request);
 }
 
+
+

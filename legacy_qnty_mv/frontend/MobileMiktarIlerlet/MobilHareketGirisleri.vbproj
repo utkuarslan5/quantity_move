@@ -1,0 +1,238 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A9F028AE-4ABC-4FF5-89DD-26543D41614E}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <StartupObject>MobileMiktarIlerlet.frmKullaniciGirisi</StartupObject>
+    <RootNamespace>MobileMiktarIlerlet</RootNamespace>
+    <AssemblyName>MobileMiktarIlerlet</AssemblyName>
+    <ProjectTypeGuids>{68B1623D-7FB9-47D8-8664-7ECEA3297D4F};{F184B08F-C81C-45F6-A57F-5ABD9991F28F}</ProjectTypeGuids>
+    <PlatformFamilyName>PocketPC</PlatformFamilyName>
+    <PlatformID>3C41C503-53EF-4c2a-8DD4-A8217CAD115E</PlatformID>
+    <OSVersion>4.20</OSVersion>
+    <MyType>WindowsForms</MyType>
+    <DeployDirSuffix>MobilHareketGirisleri</DeployDirSuffix>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionStrict>Off</OptionStrict>
+    <OptionInfer>On</OptionInfer>
+    <NativePlatformName>Pocket PC 2003</NativePlatformName>
+    <FormFactorID>
+    </FormFactorID>
+    <ApplicationIcon>ikon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>$(PlatformFamilyName)=TRUE</DefineConstants>
+    <DocumentationFile>MobileMiktarIlerlet.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <FileAlignment>512</FileAlignment>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>$(PlatformFamilyName)=TRUE</DefineConstants>
+    <DocumentationFile>MobileMiktarIlerlet.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <FileAlignment>512</FileAlignment>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Forms.DataGrid" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Data" />
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Classes\DateTime.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="frmStokSorgulama.Designer.vb">
+      <DependentUpon>frmStokSorgulama.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmStokSorgulama.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmYeniMiktarIlerlet.Designer.vb">
+      <DependentUpon>frmYeniMiktarIlerlet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmYeniMiktarIlerlet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmYeniMiktarIlerlet_2.Designer.vb">
+      <DependentUpon>frmYeniMiktarIlerlet_2.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmYeniMiktarIlerlet_2.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmYuzdeYuzKontrol.Designer.vb">
+      <DependentUpon>frmYuzdeYuzKontrol.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmYuzdeYuzKontrol.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmKullaniciGirisi.Designer.vb">
+      <DependentUpon>frmKullaniciGirisi.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmKullaniciGirisi.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmMenu.Designer.vb">
+      <DependentUpon>frmMenu.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmMenu.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmRafaTransfer.Designer.vb">
+      <DependentUpon>frmRafaTransfer.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmRafaTransfer.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmSevkeTransfer.Designer.vb">
+      <DependentUpon>frmSevkeTransfer.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmSevkeTransfer.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmUretimdenGiris.Designer.vb">
+      <DependentUpon>frmUretimdenGiris.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmUretimdenGiris.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmUretimeCikis.Designer.vb">
+      <DependentUpon>frmUretimeCikis.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmUretimeCikis.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Ortak.vb" />
+    <Compile Include="ReturnValue.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Variable.vb" />
+    <Compile Include="Web References\Mobile\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="frmStokSorgulama.resx">
+      <DependentUpon>frmStokSorgulama.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmYeniMiktarIlerlet.resx">
+      <DependentUpon>frmYeniMiktarIlerlet.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmYeniMiktarIlerlet_2.resx">
+      <DependentUpon>frmYeniMiktarIlerlet_2.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmYuzdeYuzKontrol.resx">
+      <DependentUpon>frmYuzdeYuzKontrol.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmKullaniciGirisi.resx">
+      <DependentUpon>frmKullaniciGirisi.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmMenu.resx">
+      <DependentUpon>frmMenu.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmRafaTransfer.resx">
+      <DependentUpon>frmRafaTransfer.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmSevkeTransfer.resx">
+      <DependentUpon>frmSevkeTransfer.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmUretimdenGiris.resx">
+      <DependentUpon>frmUretimdenGiris.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmUretimeCikis.resx">
+      <DependentUpon>frmUretimeCikis.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferences Include="Web References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ikon.ico" />
+    <Content Include="Config.xml" />
+    <None Include="Web References\Mobile\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Web References\Mobile\wsGeneral.disco" />
+    <None Include="Web References\Mobile\wsGeneral.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferenceUrl Include="http://192.168.0.199/General_Ws/wsGeneral.asmx">
+      <UrlBehavior>Static</UrlBehavior>
+      <RelPath>Web References\Mobile\</RelPath>
+      <UpdateFromURL>http://192.168.0.199/General_Ws/wsGeneral.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>
+      </CachedAppSettingsObjectName>
+      <CachedSettingsPropName>
+      </CachedSettingsPropName>
+    </WebReferenceUrl>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.VisualBasic.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{F184B08F-C81C-45F6-A57F-5ABD9991F28F}">
+        <HostingProcess disable="1" />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

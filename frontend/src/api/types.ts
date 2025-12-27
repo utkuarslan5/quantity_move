@@ -78,3 +78,5 @@ export interface ValidateLocationResponse {
   locationDescription?: string;
 }
 
+
+

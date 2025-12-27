@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  
+  <SqlClientConnectionString>Data Source=2.20.15.30;Initial Catalog=faz;User ID=sa2;pwd=;Connect Timeout=0</SqlClientConnectionString>   
+     
+</root>

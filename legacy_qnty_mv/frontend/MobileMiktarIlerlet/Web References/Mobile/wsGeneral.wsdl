@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="RunSqlDs">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sSql" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="TableName" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="ProviderType" type="tns:ProviderTypes" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:simpleType name="ProviderTypes">
+        <s:restriction base="s:string">
+          <s:enumeration value="SqlClient" />
+          <s:enumeration value="OleDb" />
+          <s:enumeration value="Odbc" />
+          <s:enumeration value="OracleClient" />
+        </s:restriction>
+      </s:simpleType>
+      <s:element name="RunSqlDsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RunSqlDsResult">
+              <s:complexType>
+                <s:sequence>
+                  <s:element ref="s:schema" />
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RunSql">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sSql" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="Scalar" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="ProviderType" type="tns:ProviderTypes" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RunSqlResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RunSqlResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RunSqlSp">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sSql" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="ProviderType" type="tns:ProviderTypes" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RunSqlSpResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RunSqlSpResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RunSql2">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sSql" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="Scalar" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="ProviderType" type="tns:ProviderTypes" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RunSql2Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="RunSql2Result" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="RunSqlDsSoapIn">
+    <wsdl:part name="parameters" element="tns:RunSqlDs" />
+  </wsdl:message>
+  <wsdl:message name="RunSqlDsSoapOut">
+    <wsdl:part name="parameters" element="tns:RunSqlDsResponse" />
+  </wsdl:message>
+  <wsdl:message name="RunSqlSoapIn">
+    <wsdl:part name="parameters" element="tns:RunSql" />
+  </wsdl:message>
+  <wsdl:message name="RunSqlSoapOut">
+    <wsdl:part name="parameters" element="tns:RunSqlResponse" />
+  </wsdl:message>
+  <wsdl:message name="RunSqlSpSoapIn">
+    <wsdl:part name="parameters" element="tns:RunSqlSp" />
+  </wsdl:message>
+  <wsdl:message name="RunSqlSpSoapOut">
+    <wsdl:part name="parameters" element="tns:RunSqlSpResponse" />
+  </wsdl:message>
+  <wsdl:message name="RunSql2SoapIn">
+    <wsdl:part name="parameters" element="tns:RunSql2" />
+  </wsdl:message>
+  <wsdl:message name="RunSql2SoapOut">
+    <wsdl:part name="parameters" element="tns:RunSql2Response" />
+  </wsdl:message>
+  <wsdl:portType name="wsGeneralSoap">
+    <wsdl:operation name="RunSqlDs">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Sql sorgusunu dataset olarak döndürür.</wsdl:documentation>
+      <wsdl:input message="tns:RunSqlDsSoapIn" />
+      <wsdl:output message="tns:RunSqlDsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RunSql">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Sql sorgusunu çalıştırmayı sağlar.</wsdl:documentation>
+      <wsdl:input message="tns:RunSqlSoapIn" />
+      <wsdl:output message="tns:RunSqlSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RunSqlSp">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Sql sorgusunu çalıştırmayı sağlar.</wsdl:documentation>
+      <wsdl:input message="tns:RunSqlSpSoapIn" />
+      <wsdl:output message="tns:RunSqlSpSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RunSql2">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Sql sorgusunu çalıştırmayı sağlar.</wsdl:documentation>
+      <wsdl:input message="tns:RunSql2SoapIn" />
+      <wsdl:output message="tns:RunSql2SoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="wsGeneralSoap" type="tns:wsGeneralSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="RunSqlDs">
+      <soap:operation soapAction="http://tempuri.org/RunSqlDs" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunSql">
+      <soap:operation soapAction="http://tempuri.org/RunSql" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunSqlSp">
+      <soap:operation soapAction="http://tempuri.org/RunSqlSp" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunSql2">
+      <soap:operation soapAction="http://tempuri.org/RunSql2" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="wsGeneralSoap12" type="tns:wsGeneralSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="RunSqlDs">
+      <soap12:operation soapAction="http://tempuri.org/RunSqlDs" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunSql">
+      <soap12:operation soapAction="http://tempuri.org/RunSql" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunSqlSp">
+      <soap12:operation soapAction="http://tempuri.org/RunSqlSp" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunSql2">
+      <soap12:operation soapAction="http://tempuri.org/RunSql2" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="wsGeneral">
+    <wsdl:port name="wsGeneralSoap" binding="tns:wsGeneralSoap">
+      <soap:address location="http://localhost/General_Ws/wsGeneral.asmx" />
+    </wsdl:port>
+    <wsdl:port name="wsGeneralSoap12" binding="tns:wsGeneralSoap12">
+      <soap12:address location="http://localhost/General_Ws/wsGeneral.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <DefaultWhse>MAIN</DefaultWhse>
+  <DefaultSite>Default</DefaultSite>
+  <path>http://2.20.15.32/General_Ws/wsGeneral.asmx</path>
+  <kalite>0</kalite>
+</root>

@@ -1,0 +1,7 @@
+C:\inetpub\wwwroot\General_Ws\Core\obj\Debug\ResolveAssemblyReference.cache
+C:\inetpub\wwwroot\General_Ws\Core\obj\Debug\Core.xml
+C:\inetpub\wwwroot\General_Ws\Core\obj\Debug\Core.pdb
+C:\inetpub\wwwroot\General_Ws\Core\bin\Debug\Core.dll
+C:\inetpub\wwwroot\General_Ws\Core\bin\Debug\Core.pdb
+C:\inetpub\wwwroot\General_Ws\Core\bin\Debug\Core.xml
+C:\inetpub\wwwroot\General_Ws\Core\obj\Debug\Core.dll
