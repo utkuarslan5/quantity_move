@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../build/quantity_move_api.props" />
+</Project>

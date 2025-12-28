@@ -50,14 +50,17 @@ public class QuantityMoveServiceTests
 
         _mockDatabaseService.Setup(x => x.ExecuteStoredProcedureNonQueryAsync(
                 procedureName,
-                It.IsAny<DynamicParameters>()))
-            .Callback<string, DynamicParameters>((proc, parameters) =>
+                It.IsAny<object>()))
+            .Callback<string, object>((proc, paramObj) =>
             {
-                parameters.Add("@transaction_id", transactionId);
-                parameters.Add("@return_code", returnCode);
-                parameters.Add("@error_message", (string?)null);
+                if (paramObj is DynamicParameters parameters)
+                {
+                    parameters.Add("@transaction_id", transactionId);
+                    parameters.Add("@return_code", returnCode);
+                    parameters.Add("@error_message", (string?)null);
+                }
             })
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(1);
 
         // Act
         var result = await _service.MoveQuantityAsync(request);
@@ -85,14 +88,17 @@ public class QuantityMoveServiceTests
 
         _mockDatabaseService.Setup(x => x.ExecuteStoredProcedureNonQueryAsync(
                 procedureName,
-                It.IsAny<DynamicParameters>()))
-            .Callback<string, DynamicParameters>((proc, parameters) =>
+                It.IsAny<object>()))
+            .Callback<string, object>((proc, paramObj) =>
             {
-                parameters.Add("@transaction_id", transactionId);
-                parameters.Add("@return_code", returnCode);
-                parameters.Add("@error_message", errorMessage);
+                if (paramObj is DynamicParameters parameters)
+                {
+                    parameters.Add("@transaction_id", transactionId);
+                    parameters.Add("@return_code", returnCode);
+                    parameters.Add("@error_message", errorMessage);
+                }
             })
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(1);
 
         // Act
         var result = await _service.MoveQuantityAsync(request);
@@ -119,14 +125,17 @@ public class QuantityMoveServiceTests
         DynamicParameters? capturedParams = null;
         _mockDatabaseService.Setup(x => x.ExecuteStoredProcedureNonQueryAsync(
                 procedureName,
-                It.IsAny<DynamicParameters>()))
-            .Callback<string, DynamicParameters>((proc, parameters) =>
+                It.IsAny<object>()))
+            .Callback<string, object>((proc, paramObj) =>
             {
-                capturedParams = parameters;
-                parameters.Add("@transaction_id", 12345L);
-                parameters.Add("@return_code", 0);
+                if (paramObj is DynamicParameters parameters)
+                {
+                    capturedParams = parameters;
+                    parameters.Add("@transaction_id", 12345L);
+                    parameters.Add("@return_code", 0);
+                }
             })
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(1);
 
         // Act
         await _service.MoveQuantityAsync(request);
@@ -148,7 +157,7 @@ public class QuantityMoveServiceTests
 
         _mockDatabaseService.Setup(x => x.ExecuteStoredProcedureNonQueryAsync(
                 procedureName,
-                It.IsAny<DynamicParameters>()))
+                It.IsAny<object>()))
             .ThrowsAsync(new Exception("Database error"));
 
         // Act
@@ -186,13 +195,16 @@ public class QuantityMoveServiceTests
 
         _mockDatabaseService.Setup(x => x.ExecuteStoredProcedureNonQueryAsync(
                 procedureName,
-                It.IsAny<DynamicParameters>()))
-            .Callback<string, DynamicParameters>((proc, parameters) =>
+                It.IsAny<object>()))
+            .Callback<string, object>((proc, paramObj) =>
             {
-                parameters.Add("@transaction_id", 12345L);
-                parameters.Add("@return_code", 0);
+                if (paramObj is DynamicParameters parameters)
+                {
+                    parameters.Add("@transaction_id", 12345L);
+                    parameters.Add("@return_code", 0);
+                }
             })
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(1);
 
         // Act
         var result = await _service.MoveQuantityWithValidationAsync(request);
@@ -227,7 +239,7 @@ public class QuantityMoveServiceTests
         result.ErrorMessage.Should().Be(errorMessage);
         _mockDatabaseService.Verify(x => x.ExecuteStoredProcedureNonQueryAsync(
             It.IsAny<string>(),
-            It.IsAny<DynamicParameters>()), Times.Never);
+            It.IsAny<object>()), Times.Never);
     }
 
     [Fact]
@@ -263,13 +275,16 @@ public class QuantityMoveServiceTests
 
         _mockDatabaseService.Setup(x => x.ExecuteStoredProcedureNonQueryAsync(
                 procedureName,
-                It.IsAny<DynamicParameters>()))
-            .Callback<string, DynamicParameters>((proc, parameters) =>
+                It.IsAny<object>()))
+            .Callback<string, object>((proc, paramObj) =>
             {
-                parameters.Add("@transaction_id", 12345L);
-                parameters.Add("@return_code", 0);
+                if (paramObj is DynamicParameters parameters)
+                {
+                    parameters.Add("@transaction_id", 12345L);
+                    parameters.Add("@return_code", 0);
+                }
             })
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(1);
 
         // Act
         var result = await _service.MoveQuantityWithFifoCheckAsync(request);
@@ -319,13 +334,16 @@ public class QuantityMoveServiceTests
 
         _mockDatabaseService.Setup(x => x.ExecuteStoredProcedureNonQueryAsync(
                 procedureName,
-                It.IsAny<DynamicParameters>()))
-            .Callback<string, DynamicParameters>((proc, parameters) =>
+                It.IsAny<object>()))
+            .Callback<string, object>((proc, paramObj) =>
             {
-                parameters.Add("@transaction_id", 12345L);
-                parameters.Add("@return_code", 0);
+                if (paramObj is DynamicParameters parameters)
+                {
+                    parameters.Add("@transaction_id", 12345L);
+                    parameters.Add("@return_code", 0);
+                }
             })
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(1);
 
         // Act
         var result = await _service.MoveQuantityWithFifoCheckAsync(request);
