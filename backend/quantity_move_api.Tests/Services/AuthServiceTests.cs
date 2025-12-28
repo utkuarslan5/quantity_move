@@ -47,8 +47,10 @@ public class AuthServiceTests
         var password = "testpass";
         var expectedUser = TestHelpers.CreateTestUser(username: username, password: password);
         
+        // The actual query uses TableNames.UserMaster which is "user_master"
+        // So we need to match "user_master" or "user_mst" (which is a substring of "user_master")
         _mockQueryService.Setup(x => x.QueryFirstOrDefaultAsync<User>(
-                It.Is<string>(s => s.Contains("user_mst")),
+                It.Is<string>(s => s.Contains("user_master") || s.Contains("user_mst")),
                 It.IsAny<object>()))
             .ReturnsAsync(expectedUser);
 
@@ -59,7 +61,7 @@ public class AuthServiceTests
         result.Should().NotBeNull();
         result!.Username.Should().Be(username);
         _mockQueryService.Verify(x => x.QueryFirstOrDefaultAsync<User>(
-            It.Is<string>(s => s.Contains("user_mst")),
+            It.Is<string>(s => s.Contains("user_master") || s.Contains("user_mst")),
             It.IsAny<object>()), Times.Once);
     }
 

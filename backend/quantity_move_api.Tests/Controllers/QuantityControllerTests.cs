@@ -6,23 +6,28 @@ using Moq;
 using quantity_move_api.Controllers;
 using quantity_move_api.Models;
 using quantity_move_api.Services;
+using quantity_move_api.Services.Quantity;
 using quantity_move_api.Tests.Helpers;
 
 namespace quantity_move_api.Tests.Controllers;
 
 public class QuantityControllerTests
 {
-    private readonly Mock<IQuantityService> _mockQuantityService;
+    private readonly Mock<IQuantityMoveService> _mockMoveService;
+    private readonly Mock<IQuantityValidationService> _mockValidationService;
     private readonly Mock<ILogger<QuantityController>> _mockLogger;
     private readonly Mock<IConfiguration> _mockConfiguration;
+    private readonly Mock<IConfigurationService> _mockConfigurationService;
     private readonly QuantityController _controller;
 
     public QuantityControllerTests()
     {
-        _mockQuantityService = new Mock<IQuantityService>();
+        _mockMoveService = new Mock<IQuantityMoveService>();
+        _mockValidationService = new Mock<IQuantityValidationService>();
         _mockLogger = new Mock<ILogger<QuantityController>>();
         _mockConfiguration = new Mock<IConfiguration>();
-        _controller = new QuantityController(_mockQuantityService.Object, _mockLogger.Object, _mockConfiguration.Object);
+        _mockConfigurationService = new Mock<IConfigurationService>();
+        _controller = new QuantityController(_mockMoveService.Object, _mockValidationService.Object, _mockLogger.Object, _mockConfiguration.Object, _mockConfigurationService.Object);
     }
 
     [Fact]
@@ -31,7 +36,7 @@ public class QuantityControllerTests
         // Arrange
         var request = TestHelpers.CreateMoveQuantityRequest();
         var response = TestHelpers.CreateMoveQuantityResponse(success: true);
-        _mockQuantityService.Setup(x => x.MoveQuantityAsync(request))
+        _mockMoveService.Setup(x => x.MoveQuantityAsync(request))
             .ReturnsAsync(response);
 
         // Act
@@ -74,7 +79,7 @@ public class QuantityControllerTests
         // Arrange
         var request = TestHelpers.CreateMoveQuantityRequest();
         var response = TestHelpers.CreateMoveQuantityResponse(success: false, returnCode: 1);
-        _mockQuantityService.Setup(x => x.MoveQuantityAsync(request))
+        _mockMoveService.Setup(x => x.MoveQuantityAsync(request))
             .ReturnsAsync(response);
 
         // Act
@@ -95,7 +100,7 @@ public class QuantityControllerTests
     {
         // Arrange
         var request = TestHelpers.CreateMoveQuantityRequest();
-        _mockQuantityService.Setup(x => x.MoveQuantityAsync(request))
+        _mockMoveService.Setup(x => x.MoveQuantityAsync(request))
             .ThrowsAsync(new Exception("Database connection failed"));
 
         // Act
@@ -119,8 +124,8 @@ public class QuantityControllerTests
         var request = TestHelpers.CreateMoveQuantityRequest();
         var response = TestHelpers.CreateMoveQuantityResponse(
             success: true,
-            transactionId: "TXN-12345");
-        _mockQuantityService.Setup(x => x.MoveQuantityAsync(request))
+            transactionId: 12345);
+        _mockMoveService.Setup(x => x.MoveQuantityAsync(request))
             .ReturnsAsync(response);
 
         // Act
@@ -131,7 +136,7 @@ public class QuantityControllerTests
         var okResult = result.Result as OkObjectResult;
         var apiResponse = okResult!.Value as ApiResponse<MoveQuantityResponse>;
         
-        apiResponse!.Data!.TransactionId.Should().Be("TXN-12345");
+        apiResponse!.Data!.TransactionId.Should().Be(12345);
         apiResponse.Data.ReturnCode.Should().Be(0);
     }
 

@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using quantity_move_api.Models;
 using quantity_move_api.Services;
+using quantity_move_api.Services.Quantity;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -58,26 +59,24 @@ public class QuantityIntegrationTests : IClassFixture<WebApplicationFactory<Prog
 
                 services.AddSingleton(mockAuthService.Object);
 
-                // Mock QuantityService
-                var quantityServiceDescriptor = services.SingleOrDefault(
-                    d => d.ServiceType == typeof(IQuantityService));
-                if (quantityServiceDescriptor != null)
+                // Mock QuantityMoveService
+                var quantityMoveServiceDescriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(IQuantityMoveService));
+                if (quantityMoveServiceDescriptor != null)
                 {
-                    services.Remove(quantityServiceDescriptor);
+                    services.Remove(quantityMoveServiceDescriptor);
                 }
 
-                var mockQuantityService = new Mock<IQuantityService>();
-                mockQuantityService.Setup(x => x.MoveQuantityAsync(It.IsAny<MoveQuantityRequest>()))
+                var mockQuantityMoveService = new Mock<IQuantityMoveService>();
+                mockQuantityMoveService.Setup(x => x.MoveQuantityAsync(It.IsAny<MoveQuantityRequest>()))
                     .ReturnsAsync(new MoveQuantityResponse
                     {
                         Success = true,
                         ReturnCode = 0,
-                        TransactionId = "TXN-12345",
-                        Message = "Success",
-                        RowsAffected = 1
+                        TransactionId = 12345
                     });
 
-                services.AddSingleton(mockQuantityService.Object);
+                services.AddSingleton(mockQuantityMoveService.Object);
             });
         });
 

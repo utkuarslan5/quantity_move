@@ -68,12 +68,11 @@ public static class TestHelpers
         {
             ItemCode = itemCode,
             SourceLocation = sourceLocation,
+            SourceLotNumber = "LOT001",
             TargetLocation = targetLocation,
             Quantity = quantity,
-            Lot = "LOT001",
-            Warehouse = "WH001",
-            Site = "SITE001",
-            UserId = "USER001"
+            WarehouseCode = "WH001",
+            SiteReference = "SITE001"
         };
     }
 
@@ -82,8 +81,7 @@ public static class TestHelpers
         return new ValidateLocationRequest
         {
             LocationCode = locationCode,
-            Warehouse = "WH001",
-            Site = "SITE001"
+            SiteReference = "SITE001"
         };
     }
 
@@ -104,15 +102,14 @@ public static class TestHelpers
     public static MoveQuantityResponse CreateMoveQuantityResponse(
         bool success = true,
         int returnCode = 0,
-        string? transactionId = "TXN001")
+        long? transactionId = 12345)
     {
         return new MoveQuantityResponse
         {
             Success = success,
             ReturnCode = returnCode,
             TransactionId = transactionId,
-            Message = success ? "Success" : "Failed",
-            RowsAffected = 1
+            ErrorMessage = success ? null : "Failed"
         };
     }
 

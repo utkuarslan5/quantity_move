@@ -142,7 +142,7 @@ public class FifoControllerTests
         var expectedResponse = new FifoValidationResponse
         {
             IsCompliant = true,
-            Message = "FIFO compliant"
+            WarningMessage = null
         };
         
         _mockFifoService.Setup(x => x.ValidateFifoComplianceAsync(

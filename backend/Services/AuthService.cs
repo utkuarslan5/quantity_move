@@ -66,6 +66,11 @@ public class AuthService : BaseService<AuthService>, IAuthService
                   WHERE username = @Username AND password = @Password"
             };
 
+            var allQueriesThrewExceptions = true;
+            var anyQueryReturnedNull = false;
+            Exception? criticalException = null;
+            var allExceptionsWereCritical = true;
+
             foreach (var query in queries)
             {
                 try
@@ -80,15 +85,35 @@ public class AuthService : BaseService<AuthService>, IAuthService
                         Logger.LogInformation("User {Username} validated successfully", username);
                         return user;
                     }
+                    allQueriesThrewExceptions = false;
+                    anyQueryReturnedNull = true;
                 }
                 catch (Exception ex)
                 {
+                    if (ex is InvalidOperationException)
+                    {
+                        criticalException = ex;
+                    }
+                    else
+                    {
+                        allExceptionsWereCritical = false;
+                    }
                     Logger.LogDebug(ex, "Query failed, trying next option");
                     // Continue to next query
                 }
             }
 
-            Logger.LogWarning("User {Username} not found or invalid password", username);
+            // If all queries threw exceptions and they were all critical (InvalidOperationException), re-throw the last one
+            if (allQueriesThrewExceptions && allExceptionsWereCritical && criticalException != null)
+            {
+                throw criticalException;
+            }
+
+            // Only log warning if queries returned null (not if they all threw exceptions)
+            if (!allQueriesThrewExceptions)
+            {
+                Logger.LogWarning("User {Username} not found or invalid password", username);
+            }
             return null;
         }
         catch (Exception ex)

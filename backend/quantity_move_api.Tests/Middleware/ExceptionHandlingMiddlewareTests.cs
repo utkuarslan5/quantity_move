@@ -95,8 +95,9 @@ public class ExceptionHandlingMiddlewareTests
     {
         // Arrange
         var exceptionMessage = "Argument cannot be null";
+        var exception = new ArgumentNullException("param", exceptionMessage);
         _mockNext.Setup(x => x(It.IsAny<HttpContext>()))
-            .ThrowsAsync(new ArgumentNullException("param", exceptionMessage));
+            .ThrowsAsync(exception);
 
         // Act
         await _middleware.InvokeAsync(_httpContext);
@@ -109,7 +110,8 @@ public class ExceptionHandlingMiddlewareTests
             responseBody,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         
-        apiResponse!.Message.Should().Be(exceptionMessage);
+        // ArgumentNullException.Message includes parameter name, so check that it contains the message
+        apiResponse!.Message.Should().Contain(exceptionMessage);
     }
 
     [Fact]

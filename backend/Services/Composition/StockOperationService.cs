@@ -84,11 +84,11 @@ public class StockOperationService : BaseService<StockOperationService>, IStockO
         {
             var fifoValidation = await _fifoService.ValidateFifoComplianceAsync(
                 request.ItemCode, request.SourceLotNumber, warehouseCode!, request.SiteReference);
-        if (!fifoValidation.IsCompliant && !string.IsNullOrEmpty(fifoValidation.WarningMessage))
-        {
-            Logger.LogWarning("FIFO violation detected: {WarningMessage}", fifoValidation.WarningMessage);
-            // Continue with move but log warning - could also return warning response
-        }
+            if (!fifoValidation.IsCompliant && !string.IsNullOrEmpty(fifoValidation.WarningMessage))
+            {
+                Logger.LogWarning("FIFO violation detected: {WarningMessage}", fifoValidation.WarningMessage);
+                // Continue with move but log warning - could also return warning response
+            }
         }
 
         // 6. Perform move

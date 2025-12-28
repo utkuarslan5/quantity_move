@@ -467,3 +467,4 @@
 /home/r00t/code/ekip/quantity_move/backend/quantity_move_api.Tests/obj/Debug/net8.0/quantity_move_api.Tests.pdb
 /home/r00t/code/ekip/quantity_move/backend/quantity_move_api.Tests/obj/Debug/net8.0/quantity_move_api.Tests.genruntimeconfig.cache
 /home/r00t/code/ekip/quantity_move/backend/quantity_move_api.Tests/obj/Debug/net8.0/ref/quantity_move_api.Tests.dll
+/home/r00t/code/ekip/quantity_move/backend/quantity_move_api.Tests/bin/Debug/net8.0/Microsoft.AspNetCore.Mvc.Versioning.dll

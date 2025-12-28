@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "ZyyS5sLIq3PCq/S23rQll5egQqlAQGrWAVu6IjlzKlkWW1hZ6fkrEXyiXWiqaBRBT6KJ897DlUBO32yMnG0COw==",
+  "dgSpecHash": "D4PAdDoU/BJZORoPAuViiHwQLblt5u9z2j7K8KySSSK3owRNLXos4woHLRz6OhyzpHixSv0I1DFQqIYl5d8ZAg==",
   "success": true,
   "projectFilePath": "/home/r00t/code/ekip/quantity_move/backend/quantity_move_api.Tests/quantity_move_api.Tests.csproj",
   "expectedPackageFiles": [
@@ -13,6 +13,7 @@
     "/home/r00t/.nuget/packages/fluentassertions/8.8.0/fluentassertions.8.8.0.nupkg.sha512",
     "/home/r00t/.nuget/packages/microsoft.aspnetcore.authentication.jwtbearer/8.0.22/microsoft.aspnetcore.authentication.jwtbearer.8.0.22.nupkg.sha512",
     "/home/r00t/.nuget/packages/microsoft.aspnetcore.mvc.testing/8.0.0/microsoft.aspnetcore.mvc.testing.8.0.0.nupkg.sha512",
+    "/home/r00t/.nuget/packages/microsoft.aspnetcore.mvc.versioning/5.1.0/microsoft.aspnetcore.mvc.versioning.5.1.0.nupkg.sha512",
     "/home/r00t/.nuget/packages/microsoft.aspnetcore.openapi/8.0.22/microsoft.aspnetcore.openapi.8.0.22.nupkg.sha512",
     "/home/r00t/.nuget/packages/microsoft.aspnetcore.testhost/8.0.0/microsoft.aspnetcore.testhost.8.0.0.nupkg.sha512",
     "/home/r00t/.nuget/packages/microsoft.bcl.asyncinterfaces/8.0.0/microsoft.bcl.asyncinterfaces.8.0.0.nupkg.sha512",

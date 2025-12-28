@@ -17,18 +17,28 @@ public class ExceptionHandlingMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        // Generate correlation ID if not present
+        if (!context.Request.Headers.ContainsKey("X-Correlation-ID"))
+        {
+            context.Request.Headers["X-Correlation-ID"] = Guid.NewGuid().ToString();
+        }
+        
+        var correlationId = context.Request.Headers["X-Correlation-ID"].ToString();
+        context.Response.Headers["X-Correlation-ID"] = correlationId;
+
         try
         {
             await _next(context);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception occurred");
-            await HandleExceptionAsync(context, ex);
+            _logger.LogError(ex, "An unhandled exception occurred. CorrelationId: {CorrelationId}, Path: {Path}", 
+                correlationId, context.Request.Path);
+            await HandleExceptionAsync(context, ex, correlationId);
         }
     }
 
-    private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+    private static Task HandleExceptionAsync(HttpContext context, Exception exception, string correlationId)
     {
         var code = HttpStatusCode.InternalServerError;
         var message = "An error occurred while processing your request.";
@@ -50,7 +60,13 @@ public class ExceptionHandlingMiddleware
             message = exception.Message;
         }
 
-        var response = ApiResponse<object>.ErrorResponse(message, new List<string> { exception.Message });
+        var errors = new List<string> { exception.Message };
+        if (exception.InnerException != null)
+        {
+            errors.Add($"Inner exception: {exception.InnerException.Message}");
+        }
+
+        var response = ApiResponse<object>.ErrorResponse(message, errors);
 
         var result = JsonSerializer.Serialize(response, new JsonSerializerOptions
         {
@@ -59,6 +75,7 @@ public class ExceptionHandlingMiddleware
 
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)code;
+        context.Response.Headers["X-Correlation-ID"] = correlationId;
 
         return context.Response.WriteAsync(result);
     }
