@@ -5,9 +5,6 @@ using System.Text;
 using quantity_move_api.Services;
 using quantity_move_api.Services.Stock;
 using quantity_move_api.Services.Quantity;
-using quantity_move_api.Services.Fifo;
-using quantity_move_api.Services.Barcode;
-using quantity_move_api.Services.Composition;
 using quantity_move_api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -84,23 +81,12 @@ builder.Services.AddScoped<quantity_move_api.Repositories.ILotLocationRepository
 builder.Services.AddScoped<quantity_move_api.Repositories.IItemRepository, quantity_move_api.Repositories.ItemRepository>();
 builder.Services.AddScoped<quantity_move_api.Repositories.ILocationRepository, quantity_move_api.Repositories.LocationRepository>();
 
-// Register modular stock services
+// Register stock services
 builder.Services.AddScoped<IStockQueryService, StockQueryService>();
-builder.Services.AddScoped<IStockValidationService, StockValidationService>();
-builder.Services.AddScoped<IStockLocationService, StockLocationService>();
 
-// Register modular quantity services
+// Register quantity services
 builder.Services.AddScoped<IQuantityMoveService, QuantityMoveService>();
 builder.Services.AddScoped<IQuantityValidationService, QuantityValidationService>();
-
-// Register FIFO service
-builder.Services.AddScoped<IFifoService, FifoService>();
-
-// Register barcode service
-builder.Services.AddScoped<IBarcodeService, BarcodeService>();
-
-// Register composition service
-builder.Services.AddScoped<IStockOperationService, StockOperationService>();
 
 var app = builder.Build();
 

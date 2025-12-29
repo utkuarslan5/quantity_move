@@ -10,14 +10,14 @@ namespace quantity_move_api.Services.Quantity;
 public class QuantityMoveService : BaseService<QuantityMoveService>, IQuantityMoveService
 {
     private readonly IQuantityValidationService _validationService;
-    private readonly IFifoService _fifoService;
+    private readonly IFifoService? _fifoService;
 
     public QuantityMoveService(
         IDatabaseService databaseService,
         IConfigurationService configurationService,
         ILogger<QuantityMoveService> logger,
         IQuantityValidationService validationService,
-        IFifoService fifoService)
+        IFifoService? fifoService = null)
         : base(databaseService, configurationService, logger)
     {
         _validationService = validationService;
@@ -89,15 +89,18 @@ public class QuantityMoveService : BaseService<QuantityMoveService>, IQuantityMo
 
     public async Task<MoveQuantityResponse> MoveQuantityWithFifoCheckAsync(MoveQuantityRequest request)
     {
-        // Check FIFO compliance
-        var warehouseCode = GetDefaultWarehouse(request.WarehouseCode);
-        var fifoValidation = await _fifoService.ValidateFifoComplianceAsync(
-            request.ItemCode, request.SourceLotNumber, warehouseCode, request.SiteReference).ConfigureAwait(false);
-
-        if (!fifoValidation.IsCompliant && !string.IsNullOrEmpty(fifoValidation.WarningMessage))
+        // Check FIFO compliance if service is available
+        if (_fifoService != null)
         {
-            Logger.LogWarning("FIFO violation detected: {WarningMessage}", fifoValidation.WarningMessage);
-            // Continue with move but log warning
+            var warehouseCode = GetDefaultWarehouse(request.WarehouseCode);
+            var fifoValidation = await _fifoService.ValidateFifoComplianceAsync(
+                request.ItemCode, request.SourceLotNumber, warehouseCode, request.SiteReference).ConfigureAwait(false);
+
+            if (!fifoValidation.IsCompliant && !string.IsNullOrEmpty(fifoValidation.WarningMessage))
+            {
+                Logger.LogWarning("FIFO violation detected: {WarningMessage}", fifoValidation.WarningMessage);
+                // Continue with move but log warning
+            }
         }
 
         // Validate and move

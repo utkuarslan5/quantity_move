@@ -77,6 +77,25 @@ public class QuantityIntegrationTests : IClassFixture<WebApplicationFactory<Prog
                     });
 
                 services.AddSingleton(mockQuantityMoveService.Object);
+
+                // Mock QuantityValidationService
+                var quantityValidationServiceDescriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(IQuantityValidationService));
+                if (quantityValidationServiceDescriptor != null)
+                {
+                    services.Remove(quantityValidationServiceDescriptor);
+                }
+
+                var mockQuantityValidationService = new Mock<IQuantityValidationService>();
+                mockQuantityValidationService.Setup(x => x.ValidateMoveAsync(It.IsAny<MoveValidationRequest>()))
+                    .ReturnsAsync(new MoveValidationResponse
+                    {
+                        IsValid = true,
+                        SourceValidation = new ValidationResponse { IsValid = true },
+                        TargetValidation = new ValidationResponse { IsValid = true }
+                    });
+
+                services.AddSingleton(mockQuantityValidationService.Object);
             });
         });
 
@@ -116,12 +135,14 @@ public class QuantityIntegrationTests : IClassFixture<WebApplicationFactory<Prog
         {
             ItemCode = "ITEM001",
             SourceLocation = "LOC001",
+            SourceLotNumber = "LOT001",
             TargetLocation = "LOC002",
-            Quantity = 10.0m
+            Quantity = 10.0m,
+            WarehouseCode = "WH001"
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("Quantity/move", request);
+        var response = await _client.PostAsJsonAsync("move", request);
 
         // Assert
         // The token should be set in constructor, but if it fails, we get 401
@@ -154,12 +175,14 @@ public class QuantityIntegrationTests : IClassFixture<WebApplicationFactory<Prog
         {
             ItemCode = "ITEM001",
             SourceLocation = "LOC001",
+            SourceLotNumber = "LOT001",
             TargetLocation = "LOC002",
-            Quantity = 10.0m
+            Quantity = 10.0m,
+            WarehouseCode = "WH001"
         };
 
         // Act
-        var response = await clientWithoutAuth.PostAsJsonAsync("Quantity/move", request);
+        var response = await clientWithoutAuth.PostAsJsonAsync("move", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -178,7 +201,7 @@ public class QuantityIntegrationTests : IClassFixture<WebApplicationFactory<Prog
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("Quantity/move", request);
+        var response = await _client.PostAsJsonAsync("move", request);
 
         // Assert
         // Note: Authorization happens before validation, so we get 401 instead of 400
@@ -199,7 +222,7 @@ public class QuantityIntegrationTests : IClassFixture<WebApplicationFactory<Prog
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("Quantity/move", request);
+        var response = await _client.PostAsJsonAsync("move", request);
 
         // Assert
         // Note: Authorization happens before validation, so we get 401 instead of 400

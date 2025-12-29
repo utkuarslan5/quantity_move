@@ -34,17 +34,17 @@ public class MiddlewareIntegrationTests : IClassFixture<WebApplicationFactory<Pr
     {
         // Arrange - Try to access a protected endpoint without auth
         // The endpoint is POST, not GET, and requires authentication
-        // Note: Route is "api/quantity" and path base is "/api", so full path is "/api/api/quantity/move"
-        // But since client BaseAddress is "/api/", calling "/api/quantity/move" should work
-        var request = new { itemCode = "TEST", sourceLocation = "LOC1", targetLocation = "LOC2", quantity = 1.0 };
+        // Note: Route is "api/move" and path base is "/api", so full path is "/api/api/move"
+        // But since client BaseAddress is "/api/", calling "/api/move" should work
+        var request = new { item_code = "TEST", source_location = "LOC1", source_lot_number = "LOT1", target_location = "LOC2", quantity = 1.0 };
         var content = new StringContent(
             JsonSerializer.Serialize(request),
             Encoding.UTF8,
             "application/json");
         
         // Act - Try to POST to protected endpoint without auth
-        // Use the full path since route includes "api/quantity"
-        var response = await _client.PostAsync("/api/quantity/move", content);
+        // Use the full path since route includes "api/move"
+        var response = await _client.PostAsync("/api/move", content);
 
         // Assert - Should return 401 (Unauthorized) from authentication middleware
         // If route doesn't match, it returns 404, so we accept either 401 or 404
