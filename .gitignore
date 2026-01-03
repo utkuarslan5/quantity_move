@@ -1,3 +1,5 @@
 .cursor
 api/bin/
 api/obj/
+logs/
+*.log

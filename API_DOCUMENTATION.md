@@ -1,11 +1,18 @@
 # Quantity Move API - Complete Documentation
-//prod ip 10.0.100.97
+
 ## Table of Contents
 1. [Architecture Overview](#architecture-overview)
 2. [API Methods List](#api-methods-list)
 3. [Service Architecture](#service-architecture)
 4. [Workflows](#workflows)
 5. [Design Principles](#design-principles)
+6. [Service Explanations](#service-explanations)
+7. [Request/Response Models](#requestresponse-models)
+8. [Database Tables](#database-tables)
+9. [Configuration](#configuration)
+10. [Error Handling](#error-handling)
+11. [Authentication](#authentication)
+12. [Summary](#summary)
 
 ---
 
@@ -105,7 +112,6 @@ The Quantity Move API follows a **modular architecture** with clear separation o
 |--------|----------|-------------|------------|
 | `GET` | `/api/health` | Basic health check (service is running) | None |
 | `GET` | `/api/health/ready` | Readiness check (service is ready to accept requests) | None |
-| `GET` | `/api/health/live` | Liveness check (service is alive) | None |
 
 **Authentication**: All health endpoints are public (no authentication required).
 
@@ -586,6 +592,18 @@ Different strategies for different scenarios:
 
 ---
 
+## Configuration
+
+### Database Connection
+
+The API connects to the SQL Server database using connection settings configured in `appsettings.json`.
+
+**Local VPN Database IP**: `10.0.100.97`
+
+> **Note**: This is a local VPN IP address used for database connectivity. Database connection strings should be configured in environment-specific configuration files (`appsettings.json`, `appsettings.Development.json`, etc.) and should not be hardcoded in the application.
+
+---
+
 ## Error Handling
 
 All endpoints return standardized `ApiResponse<T>` format:
@@ -631,7 +649,7 @@ The Quantity Move API provides a **modular, focused architecture** with:
   - Stock: 1 endpoint (barcode lookup)
   - Move: 2 endpoints (validate, move)
   - Auth: 1 endpoint (login)
-  - Health: 3 endpoints (health, ready, live)
+  - Health: 2 endpoints (health, ready)
 - **9 service interfaces** with clear responsibilities:
   - Stock: Query, Validation, Location services
   - Quantity: Move, Validation services
@@ -653,4 +671,3 @@ The architecture emphasizes:
 - ✅ Legacy Database Compatibility
 
 **Database Integration**: The API is designed to work with the existing legacy database schema. See **[DATABASE_INTEGRATION.md](DATABASE_INTEGRATION.md)** for complete database documentation including table structures, stored procedure parameters, and verification checklist.
-

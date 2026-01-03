@@ -130,7 +130,6 @@ The API will be available at `https://localhost:5001/api` (or configured port).
 
 - `GET /api/health` - Basic health check (service is running)
 - `GET /api/health/ready` - Readiness check (service is ready to accept requests)
-- `GET /api/health/live` - Liveness check (service is alive)
   - All health endpoints are public (no authentication required)
 
 ## Example Usage

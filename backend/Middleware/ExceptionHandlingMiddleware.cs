@@ -1,6 +1,7 @@
 using quantity_move_api.Models;
 using System.Net;
 using System.Text.Json;
+using Serilog.Context;
 
 namespace quantity_move_api.Middleware;
 
@@ -32,8 +33,27 @@ public class ExceptionHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception occurred. CorrelationId: {CorrelationId}, Path: {Path}", 
-                correlationId, context.Request.Path);
+            // Enrich log context with request details
+            var username = context.User?.Identity?.Name ?? "Anonymous";
+            var userId = context.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            
+            using (LogContext.PushProperty("CorrelationId", correlationId))
+            using (LogContext.PushProperty("RequestId", context.TraceIdentifier))
+            using (LogContext.PushProperty("RequestPath", context.Request.Path))
+            using (LogContext.PushProperty("RequestMethod", context.Request.Method))
+            using (LogContext.PushProperty("Username", username))
+            using (LogContext.PushProperty("UserId", userId ?? "N/A"))
+            using (LogContext.PushProperty("RemoteIpAddress", context.Connection.RemoteIpAddress?.ToString() ?? "Unknown"))
+            {
+                _logger.LogError(ex, 
+                    "An unhandled exception occurred. CorrelationId: {CorrelationId}, Path: {Path}, Method: {Method}, User: {Username}, IP: {RemoteIpAddress}",
+                    correlationId, 
+                    context.Request.Path,
+                    context.Request.Method,
+                    username,
+                    context.Connection.RemoteIpAddress?.ToString() ?? "Unknown");
+            }
+            
             await HandleExceptionAsync(context, ex, correlationId);
         }
     }
