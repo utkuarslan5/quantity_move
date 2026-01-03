@@ -100,7 +100,9 @@ public class MoveController : BaseController
 
             if (!response.Success)
             {
-                return BadRequest(ApiResponse<MoveQuantityResponse>.ErrorResponse(
+                // Return 422 Unprocessable Entity for business operation failures after validation passed
+                // This distinguishes operation failures from client request errors (400 Bad Request)
+                return UnprocessableEntity(ApiResponse<MoveQuantityResponse>.ErrorResponse(
                     response.ErrorMessage ?? "Move operation failed",
                     new List<string> { response.ErrorMessage ?? "Move operation failed" }));
             }

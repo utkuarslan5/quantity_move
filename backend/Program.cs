@@ -258,8 +258,9 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Map health check endpoints (before controllers to allow unauthenticated access)
-app.MapHealthChecks("/api/health/ready");
+// Note: Health check endpoints are handled by HealthController
+// The built-in MapHealthChecks middleware was removed to avoid route conflicts
+// HealthController provides custom health endpoints with metrics and detailed information
 
 app.MapControllers();
 

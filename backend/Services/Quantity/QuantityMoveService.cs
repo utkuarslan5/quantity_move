@@ -136,20 +136,28 @@ public class QuantityMoveService : BaseService<QuantityMoveService>, IQuantityMo
             var fifoValidation = await _fifoService.ValidateFifoComplianceAsync(
                 request.ItemCode, request.SourceLotNumber, warehouseCode, request.SiteReference).ConfigureAwait(false);
 
-            if (!fifoValidation.IsCompliant && !string.IsNullOrEmpty(fifoValidation.WarningMessage))
+            if (!fifoValidation.IsCompliant)
             {
-                Logger.LogWarning("FIFO violation detected: {WarningMessage}", fifoValidation.WarningMessage);
+                var warningMessage = fifoValidation.WarningMessage ?? "FIFO compliance validation failed";
+                Logger.LogWarning("FIFO violation detected: {WarningMessage}", warningMessage);
                 BusinessEventLogger.LogFifoViolation(
                     Logger,
                     request.ItemCode,
                     request.SourceLotNumber ?? "N/A",
-                    fifoValidation.WarningMessage,
+                    warningMessage,
                     System.Diagnostics.Activity.Current?.Id);
-                // Continue with move but log warning
+                
+                // Return early with FIFO violation error
+                return new MoveQuantityResponse
+                {
+                    Success = false,
+                    ReturnCode = -2,
+                    ErrorMessage = warningMessage
+                };
             }
         }
 
-        // Validate and move
+        // Validate and move (FIFO check passed)
         return await MoveQuantityWithValidationAsync(request).ConfigureAwait(false);
     }
 }
