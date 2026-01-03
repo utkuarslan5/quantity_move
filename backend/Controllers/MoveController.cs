@@ -60,7 +60,7 @@ public class MoveController : BaseController
 
     /// <summary>
     /// Execute a move operation.
-    /// First validates the move, then executes it by calling the move_quantity stored procedure.
+    /// First validates the move, then executes it by calling the TR_Miktar_Ilerlet stored procedure.
     /// </summary>
     [HttpPost]
     public async Task<ActionResult<ApiResponse<MoveQuantityResponse>>> Move([FromBody] MoveQuantityRequest request)

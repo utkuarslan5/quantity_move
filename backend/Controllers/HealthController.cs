@@ -30,6 +30,7 @@ public class HealthController : ControllerBase
 
     /// <summary>
     /// Readiness check endpoint - indicates if the service is ready to accept requests
+    /// Includes database connection and other dependency checks
     /// </summary>
     [HttpGet("ready")]
     public async Task<ActionResult> Ready()
@@ -66,14 +67,5 @@ public class HealthController : ControllerBase
                 error = "Health check failed"
             });
         }
-    }
-
-    /// <summary>
-    /// Liveness check endpoint - indicates if the service is alive (basic check)
-    /// </summary>
-    [HttpGet("live")]
-    public IActionResult Live()
-    {
-        return Ok(new { status = "alive", timestamp = DateTime.UtcNow });
     }
 }

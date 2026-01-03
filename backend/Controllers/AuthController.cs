@@ -58,7 +58,8 @@ public class AuthController : ControllerBase
                     UserId = user.UserId,
                     Username = user.Username,
                     FullName = user.FullName,
-                    Email = user.Email
+                    Email = user.Email,
+                    Warehouse = user.Warehouse
                 }
             };
 

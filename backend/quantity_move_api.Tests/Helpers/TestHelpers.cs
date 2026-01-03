@@ -37,7 +37,7 @@ public static class TestHelpers
         return new Mock<ILogger<T>>();
     }
 
-    public static User CreateTestUser(int userId = 1, string username = "testuser", string password = "testpass")
+    public static User CreateTestUser(int userId = 1, string username = "testuser", string password = "testpass", string? warehouse = "MAIN")
     {
         return new User
         {
@@ -45,7 +45,8 @@ public static class TestHelpers
             Username = username,
             Password = password,
             FullName = "Test User",
-            Email = "test@example.com"
+            Email = "test@example.com",
+            Warehouse = warehouse
         };
     }
 

@@ -40,19 +40,25 @@ public class AuthServiceTests
     }
 
     [Fact]
-    public async Task ValidateUserAsync_WithUserMstTable_ReturnsUser()
+    public async Task ValidateUserAsync_WithTRM_EDIUSERTable_ReturnsUser()
     {
         // Arrange
         var username = "testuser";
         var password = "testpass";
         var expectedUser = TestHelpers.CreateTestUser(username: username, password: password);
+        expectedUser.Warehouse = "MAIN";
         
-        // The actual query uses TableNames.UserMaster which is "user_master"
-        // So we need to match "user_master" or "user_mst" (which is a substring of "user_master")
+        // The actual query uses TableNames.UserMaster which is "TRM_EDIUSER"
         _mockQueryService.Setup(x => x.QueryFirstOrDefaultAsync<User>(
-                It.Is<string>(s => s.Contains("user_master") || s.Contains("user_mst")),
+                It.Is<string>(s => s.Contains("TRM_EDIUSER")),
                 It.IsAny<object>()))
             .ReturnsAsync(expectedUser);
+        
+        // Setup employee_mst query (optional validation)
+        _mockQueryService.Setup(x => x.QueryFirstOrDefaultAsync<dynamic>(
+                It.Is<string>(s => s.Contains("employee_mst")),
+                It.IsAny<object>()))
+            .ReturnsAsync(new { emp_num = username, site_Ref = "faz", full_name = "Test User" });
 
         // Act
         var result = await _authService.ValidateUserAsync(username, password);
@@ -60,69 +66,12 @@ public class AuthServiceTests
         // Assert
         result.Should().NotBeNull();
         result!.Username.Should().Be(username);
+        result.Warehouse.Should().Be("MAIN");
         _mockQueryService.Verify(x => x.QueryFirstOrDefaultAsync<User>(
-            It.Is<string>(s => s.Contains("user_master") || s.Contains("user_mst")),
+            It.Is<string>(s => s.Contains("TRM_EDIUSER")),
             It.IsAny<object>()), Times.Once);
     }
 
-    [Fact]
-    public async Task ValidateUserAsync_WithEmployeesTable_ReturnsUser()
-    {
-        // Arrange
-        var username = "testuser";
-        var password = "testpass";
-        var expectedUser = TestHelpers.CreateTestUser(username: username, password: password);
-        
-        // First query fails, second succeeds
-        _mockQueryService.Setup(x => x.QueryFirstOrDefaultAsync<User>(
-                It.Is<string>(s => s.Contains("user_mst")),
-                It.IsAny<object>()))
-            .ThrowsAsync(new Exception("Table not found"));
-        
-        _mockQueryService.Setup(x => x.QueryFirstOrDefaultAsync<User>(
-                It.Is<string>(s => s.Contains("employees")),
-                It.IsAny<object>()))
-            .ReturnsAsync(expectedUser);
-
-        // Act
-        var result = await _authService.ValidateUserAsync(username, password);
-
-        // Assert
-        result.Should().NotBeNull();
-        result!.Username.Should().Be(username);
-    }
-
-    [Fact]
-    public async Task ValidateUserAsync_WithUsersTable_ReturnsUser()
-    {
-        // Arrange
-        var username = "testuser";
-        var password = "testpass";
-        var expectedUser = TestHelpers.CreateTestUser(username: username, password: password);
-        
-        // First two queries fail, third succeeds
-        _mockQueryService.Setup(x => x.QueryFirstOrDefaultAsync<User>(
-                It.Is<string>(s => s.Contains("user_mst")),
-                It.IsAny<object>()))
-            .ThrowsAsync(new Exception("Table not found"));
-        
-        _mockQueryService.Setup(x => x.QueryFirstOrDefaultAsync<User>(
-                It.Is<string>(s => s.Contains("employees")),
-                It.IsAny<object>()))
-            .ThrowsAsync(new Exception("Table not found"));
-        
-        _mockQueryService.Setup(x => x.QueryFirstOrDefaultAsync<User>(
-                It.Is<string>(s => s.Contains("users") && !s.Contains("user_mst") && !s.Contains("employees")),
-                It.IsAny<object>()))
-            .ReturnsAsync(expectedUser);
-
-        // Act
-        var result = await _authService.ValidateUserAsync(username, password);
-
-        // Assert
-        result.Should().NotBeNull();
-        result!.Username.Should().Be(username);
-    }
 
     [Fact]
     public async Task ValidateUserAsync_WithAllQueriesFailing_ReturnsNull()

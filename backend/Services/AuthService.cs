@@ -31,65 +31,61 @@ public class AuthService : BaseService<AuthService>, IAuthService
         {
             Logger.LogInformation("Validating user {Username}", username);
 
-            // Try multiple possible table/column combinations
-            // This will need adjustment based on actual schema
-            var queries = new[]
-            {
-                // Option 1: user_mst table (common in Infor)
-                $@"SELECT TOP 1 
-                    user_id AS UserId,
-                    user_name AS Username,
-                    password AS Password,
-                    full_name AS FullName,
-                    email AS Email
-                  FROM {TableNames.UserMaster}
-                  WHERE user_name = @Username AND password = @Password",
-                
-                // Option 2: employees table
-                @"SELECT TOP 1 
-                    emp_id AS UserId,
-                    emp_name AS Username,
-                    password AS Password,
-                    full_name AS FullName,
-                    email AS Email
-                  FROM employees
-                  WHERE emp_name = @Username AND password = @Password",
-                
-                // Option 3: users table
-                @"SELECT TOP 1 
-                    id AS UserId,
-                    username AS Username,
-                    password AS Password,
-                    full_name AS FullName,
-                    email AS Email
-                  FROM users
-                  WHERE username = @Username AND password = @Password"
-            };
+            // Query TRM_EDIUSER table (legacy authentication table)
+            var userQuery = $@"SELECT TOP 1 
+                Kullanici AS Username,
+                Sifre AS Password,
+                Ambar AS Warehouse
+              FROM {TableNames.UserMaster}
+              WHERE Kullanici = @Username AND Sifre = @Password";
 
-            foreach (var query in queries)
-            {
-                try
-                {
-                    var user = await _queryService.QueryFirstOrDefaultAsync<User>(
-                        query,
-                        new { Username = username, Password = password }
-                    ).ConfigureAwait(false);
+            var user = await _queryService.QueryFirstOrDefaultAsync<User>(
+                userQuery,
+                new { Username = username, Password = password }
+            ).ConfigureAwait(false);
 
-                    if (user != null)
-                    {
-                        Logger.LogInformation("User {Username} validated successfully", username);
-                        return user;
-                    }
-                }
-                catch (Exception ex)
+            if (user == null)
+            {
+                Logger.LogWarning("User {Username} not found or invalid password", username);
+                return null;
+            }
+
+            // Validate employee exists (matches legacy app behavior)
+            var defaultSite = ConfigurationService.GetDefaultSite();
+            var siteRef = string.IsNullOrEmpty(defaultSite) || defaultSite == "Default" ? "faz" : defaultSite;
+            var employeeQuery = @"SELECT TOP 1 
+                emp_num,
+                site_Ref,
+                dept,
+                full_name
+              FROM employee_mst
+              WHERE LTRIM(emp_num) = @Username AND site_Ref = @SiteRef";
+
+            var employee = await _queryService.QueryFirstOrDefaultAsync<dynamic>(
+                employeeQuery,
+                new { Username = username, SiteRef = siteRef }
+            ).ConfigureAwait(false);
+
+            if (employee == null)
+            {
+                Logger.LogWarning("User {Username} employee record not found", username);
+                // Still return user but log warning (legacy app shows error but we'll be more lenient)
+            }
+            else
+            {
+                // Set full name from employee record if available
+                if (user.FullName == null && employee.full_name != null)
                 {
-                    Logger.LogDebug(ex, "Query failed, trying next option");
-                    // Continue to next query
+                    user.FullName = employee.full_name.ToString();
                 }
             }
 
-            Logger.LogWarning("User {Username} not found or invalid password", username);
-            return null;
+            // Set UserId from username (since TRM_EDIUSER doesn't have a numeric ID)
+            // Use hash of username as a simple ID
+            user.UserId = username.GetHashCode();
+
+            Logger.LogInformation("User {Username} validated successfully", username);
+            return user;
         }
         catch (Exception ex)
         {

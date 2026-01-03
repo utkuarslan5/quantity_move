@@ -31,5 +31,8 @@ public class MoveQuantityRequest
 
     [JsonPropertyName("site_reference")]
     public string? SiteReference { get; set; }
+
+    [JsonPropertyName("document_number")]
+    public string? DocumentNumber { get; set; }
 }
 

@@ -81,3 +81,4 @@
 /home/r00t/code/ekip/quantity_move/backend/obj/Debug/net8.0/quantity_move_api.pdb
 /home/r00t/code/ekip/quantity_move/backend/obj/Debug/net8.0/quantity_move_api.genruntimeconfig.cache
 /home/r00t/code/ekip/quantity_move/backend/obj/Debug/net8.0/ref/quantity_move_api.dll
+/home/r00t/code/ekip/quantity_move/backend/bin/Debug/net8.0/HealthChecks.SqlServer.dll

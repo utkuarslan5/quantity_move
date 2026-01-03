@@ -13,5 +13,6 @@ public class UserInfo
     public string Username { get; set; } = string.Empty;
     public string? FullName { get; set; }
     public string? Email { get; set; }
+    public string? Warehouse { get; set; }
 }
 

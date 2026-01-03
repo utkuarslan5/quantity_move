@@ -27,9 +27,15 @@ builder.Services.AddApiVersioning(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add health checks
+// Add health checks with database connection check
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddHealthChecks()
-    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy());
+    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy())
+    .AddSqlServer(
+        connectionString ?? throw new InvalidOperationException("Connection string is not configured"),
+        name: "database",
+        tags: new[] { "db", "sql", "sqlserver" },
+        timeout: TimeSpan.FromSeconds(15));
 
 // Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt");

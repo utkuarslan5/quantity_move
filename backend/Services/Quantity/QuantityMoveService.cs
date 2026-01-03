@@ -32,13 +32,12 @@ public class QuantityMoveService : BaseService<QuantityMoveService>, IQuantityMo
         var procedureName = ConfigurationService.GetStoredProcedureName("MoveQuantity");
 
         var parameters = new DynamicParameters();
-        parameters.Add("@item_code", request.ItemCode);
-        parameters.Add("@source_location", request.SourceLocation);
-        parameters.Add("@source_lot_number", request.SourceLotNumber);
-        parameters.Add("@target_location", request.TargetLocation);
-        parameters.Add("@quantity", request.Quantity);
-        parameters.Add("@warehouse_code", request.WarehouseCode);
-        parameters.Add("@site_reference", request.SiteReference ?? (object)DBNull.Value);
+        parameters.Add("@Item", request.ItemCode);
+        parameters.Add("@loc1", request.SourceLocation);
+        parameters.Add("@lot1", request.SourceLotNumber);
+        parameters.Add("@loc2", request.TargetLocation);
+        parameters.Add("@qty", request.Quantity);
+        parameters.Add("@DocumentNum", request.DocumentNumber ?? (object)DBNull.Value);
 
         parameters.Add("@transaction_id", dbType: DbType.Int64, direction: ParameterDirection.Output);
         parameters.Add("@return_code", dbType: DbType.Int32, direction: ParameterDirection.Output);

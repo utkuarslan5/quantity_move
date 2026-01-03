@@ -11,7 +11,7 @@ public static class ColumnNames
     public const string LotTracked = "lot_tracked";
     public const string Description = "description";
     public const string LocationType = "uf_yer_tipi";
-    public const string FifoDate = "fifo_date";
+    public const string FifoDate = "FIFO";  // Legacy app uses uppercase FIFO column name
     public const string CreateDate = "create_date";
     public const string RecordDate = "record_date";
 }

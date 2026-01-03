@@ -1,5 +1,5 @@
 # Quantity Move API - Complete Documentation
-
+//prod ip 10.0.100.97
 ## Table of Contents
 1. [Architecture Overview](#architecture-overview)
 2. [API Methods List](#api-methods-list)
@@ -19,7 +19,7 @@ The Quantity Move API follows a **modular architecture** with clear separation o
 ┌─────────────────────────────────────────────────────────────┐
 │                      API Controllers                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
-│  │  Stock   │  │ Quantity │  │   FIFO   │  │ Barcode  │   │
+│  │  Stock   │  │   Move   │  │   Auth   │  │  Health  │   │
 │  │Controller│  │Controller│  │Controller│  │Controller│   │
 │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘   │
 └───────┼─────────────┼─────────────┼─────────────┼─────────┘
@@ -59,7 +59,9 @@ The Quantity Move API follows a **modular architecture** with clear separation o
 │  - item_mst (Item Master)                                   │
 │  - location_mst (Location Master)                          │
 │  - lot_mst (Lot Master)                                     │
-│  - fifo_summary (FIFO Summary)                             │
+│  - TRM_FIFO_SUM (FIFO Summary - legacy)                    │
+│  - TRM_EDIUSER (User Authentication - legacy)              │
+│  - employee_mst (Employee Master)                          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -69,58 +71,43 @@ The Quantity Move API follows a **modular architecture** with clear separation o
 
 ### Stock Controller (`/api/stock`)
 
-#### Query Endpoints
+| Method | Endpoint | Description | Parameters |
+|--------|----------|-------------|------------|
+| `GET` | `/api/stock/{barcode}` | Get stock locations and quantities by barcode | `barcode` (route parameter, format: `item_code%lot_num`) |
+
+**Barcode Format**: `item_code%lot_num` (e.g., `"ITEM123%LOT456"`)
+
+**Response**: Returns all locations with stock for the item/lot combination.
+
+### Move Controller (`/api/move`)
+
+| Method | Endpoint | Description | Request Body |
+|--------|----------|-------------|--------------|
+| `POST` | `/api/move/validate` | Validate if a move operation is allowed | `MoveValidationRequest` |
+| `POST` | `/api/move` | Execute a move operation (includes automatic validation) | `MoveQuantityRequest` |
+
+**Move Endpoint Behavior**:
+- Automatically validates the move before execution
+- Calls `TR_Miktar_Ilerlet` stored procedure to perform the move
+- Returns transaction ID and status
+
+### Auth Controller (`/api/auth`)
+
+| Method | Endpoint | Description | Request Body |
+|--------|----------|-------------|--------------|
+| `POST` | `/api/auth/login` | Authenticate user and get JWT token | `LoginRequest` |
+
+**Authentication**: Public endpoint (no authentication required). Returns JWT token for subsequent API calls.
+
+### Health Controller (`/api/health`)
 
 | Method | Endpoint | Description | Parameters |
 |--------|----------|-------------|------------|
-| `GET` | `/api/stock/quantity` | Get quantity at specific location | `itemCode`, `lotNumber`, `locationCode`, `warehouseCode` |
-| `GET` | `/api/stock/locations` | Get all locations for item/lot | `itemCode`, `lotNumber`, `warehouseCode`, `includeZeroQuantity` |
-| `GET` | `/api/stock/locations/with-stock` | Get locations with stock | `itemCode`, `lotNumber`, `warehouseCode` |
-| `GET` | `/api/stock/current-location` | Get current location(s) for item/lot | `itemCode`, `lotNumber`, `warehouseCode` |
-| `GET` | `/api/stock/summary` | Get stock summary for item | `itemCode`, `warehouseCode` |
+| `GET` | `/api/health` | Basic health check (service is running) | None |
+| `GET` | `/api/health/ready` | Readiness check (service is ready to accept requests) | None |
+| `GET` | `/api/health/live` | Liveness check (service is alive) | None |
 
-#### Validation Endpoints
-
-| Method | Endpoint | Description | Request Body |
-|--------|----------|-------------|--------------|
-| `POST` | `/api/stock/validate/item` | Validate item exists and is lot-tracked | `ValidateItemRequest` |
-| `POST` | `/api/stock/validate/lot` | Validate lot exists | `ValidateLotRequest` |
-| `POST` | `/api/stock/validate/location` | Validate location exists | `ValidateLocationRequest` |
-| `POST` | `/api/stock/validate/availability` | Validate stock availability | `ValidateStockRequest` |
-| `POST` | `/api/stock/validate/move` | Combined validation for move operation | `StockMoveValidationRequest` |
-
-### Quantity Controller (`/api/quantity`)
-
-#### Validation Endpoints (Pre-Move)
-
-| Method | Endpoint | Description | Request Body |
-|--------|----------|-------------|--------------|
-| `POST` | `/api/quantity/validate/source` | Validate source location has sufficient stock | `ValidateSourceRequest` |
-| `POST` | `/api/quantity/validate/target` | Validate target location is valid | `ValidateTargetRequest` |
-| `POST` | `/api/quantity/validate/move` | Validate move is allowed | `MoveValidationRequest` |
-
-#### Move Endpoints
-
-| Method | Endpoint | Description | Request Body |
-|--------|----------|-------------|--------------|
-| `POST` | `/api/quantity/move` | Simple move operation | `MoveQuantityRequest` |
-| `POST` | `/api/quantity/move/with-validation` | Move with validation | `MoveQuantityRequest` |
-| `POST` | `/api/quantity/move/with-fifo` | Move with FIFO check | `MoveQuantityRequest` |
-
-### FIFO Controller (`/api/fifo`)
-
-| Method | Endpoint | Description | Parameters/Body |
-|--------|----------|-------------|-----------------|
-| `GET` | `/api/fifo/oldest-lot` | Get oldest lot for item | `itemCode`, `warehouseCode`, `siteReference` |
-| `POST` | `/api/fifo/validate` | Check FIFO compliance | `FifoValidationRequest` |
-| `GET` | `/api/fifo/summary` | Get FIFO summary for item | `itemCode`, `warehouseCode`, `siteReference` |
-
-### Barcode Controller (`/api/barcode`)
-
-| Method | Endpoint | Description | Request Body |
-|--------|----------|-------------|--------------|
-| `POST` | `/api/barcode/parse` | Parse barcode string (item%lot%quantity) | `string` |
-| `POST` | `/api/barcode/lookup` | Lookup item/lot from barcode | `string` |
+**Authentication**: All health endpoints are public (no authentication required).
 
 ---
 
@@ -178,14 +165,13 @@ IStockOperationService (Composition Service)
 ```mermaid
 graph TD
     StockController --> IStockQueryService
-    StockController --> IStockValidationService
-    StockController --> IStockLocationService
     
-    QuantityController --> IQuantityMoveService
-    QuantityController --> IQuantityValidationService
+    MoveController --> IQuantityMoveService
+    MoveController --> IQuantityValidationService
     
-    FifoController --> IFifoService
-    BarcodeController --> IBarcodeService
+    AuthController --> IAuthService
+    
+    HealthController --> HealthCheckService
     
     IQuantityMoveService --> IQuantityValidationService
     IQuantityMoveService --> IFifoService
@@ -208,92 +194,21 @@ graph TD
 
 ## Workflows
 
-### 1. Stock Validation Workflow
+### 1. Move Validation Workflow
 
-**Purpose**: Validate that stock is available and valid before performing operations.
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant StockController
-    participant StockValidationService
-    participant DatabaseService
-    participant Database
-
-    Client->>StockController: POST /api/stock/validate/move
-    StockController->>StockValidationService: ValidateStockForMoveAsync
-    
-    StockValidationService->>StockValidationService: ValidateItemAsync
-    StockValidationService->>DatabaseService: Query item_mst
-    DatabaseService->>Database: SELECT item, lot_tracked
-    Database-->>DatabaseService: Item data
-    DatabaseService-->>StockValidationService: Item validation result
-    
-    StockValidationService->>StockValidationService: ValidateLotAsync
-    StockValidationService->>DatabaseService: Query lot_mst
-    DatabaseService->>Database: SELECT lot
-    Database-->>DatabaseService: Lot data
-    DatabaseService-->>StockValidationService: Lot validation result
-    
-    StockValidationService->>StockValidationService: ValidateLocationAsync (Source)
-    StockValidationService->>DatabaseService: Query location_mst
-    DatabaseService->>Database: SELECT loc, uf_yer_tipi
-    Database-->>DatabaseService: Location data
-    DatabaseService-->>StockValidationService: Source location validation
-    
-    StockValidationService->>StockValidationService: ValidateLocationAsync (Target)
-    StockValidationService->>DatabaseService: Query location_mst
-    DatabaseService->>Database: SELECT loc, uf_yer_tipi
-    Database-->>DatabaseService: Location data
-    DatabaseService-->>StockValidationService: Target location validation
-    
-    StockValidationService->>StockValidationService: ValidateStockAvailabilityAsync
-    StockValidationService->>DatabaseService: Query lot_loc_mst
-    DatabaseService->>Database: SELECT qty_on_hand
-    Database-->>DatabaseService: Quantity data
-    DatabaseService-->>StockValidationService: Availability result
-    
-    StockValidationService->>StockValidationService: Combine all validations
-    StockValidationService-->>StockController: CombinedValidationResponse
-    StockController-->>Client: API Response
-```
-
-**Steps**:
-1. **Validate Item**: Check if item exists and is lot-tracked
-2. **Validate Lot**: Verify lot number exists for the item
-3. **Validate Source Location**: Ensure source location exists and is valid
-4. **Validate Target Location**: Ensure target location exists and is valid
-5. **Validate Stock Availability**: Check if sufficient quantity exists at source
-6. **Combine Results**: Return comprehensive validation response
-
----
-
-### 2. Quantity Move with Full Validation Workflow
-
-**Purpose**: Move quantity from source to target location with complete validation.
+**Purpose**: Validate that a move operation is allowed before execution.
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant QuantityController
-    participant QuantityMoveService
+    participant MoveController
     participant QuantityValidationService
-    participant StockValidationService
-    participant FifoService
     participant DatabaseService
     participant Database
 
-    Client->>QuantityController: POST /api/quantity/move/with-fifo
-    QuantityController->>QuantityMoveService: MoveQuantityWithFifoCheckAsync
+    Client->>MoveController: POST /api/move/validate
+    MoveController->>QuantityValidationService: ValidateMoveAsync
     
-    QuantityMoveService->>FifoService: ValidateFifoComplianceAsync
-    FifoService->>DatabaseService: Query fifo_summary
-    DatabaseService->>Database: SELECT oldest lot
-    Database-->>DatabaseService: FIFO data
-    DatabaseService-->>FifoService: FIFO validation result
-    FifoService-->>QuantityMoveService: FIFO compliance status
-    
-    QuantityMoveService->>QuantityValidationService: ValidateMoveAsync
     QuantityValidationService->>QuantityValidationService: ValidateSourceStockAsync
     QuantityValidationService->>DatabaseService: Query lot_loc_mst
     DatabaseService->>Database: SELECT qty_on_hand
@@ -306,73 +221,86 @@ sequenceDiagram
     Database-->>DatabaseService: Location data
     DatabaseService-->>QuantityValidationService: Target validation
     
-    QuantityValidationService-->>QuantityMoveService: Move validation result
-    
-    QuantityMoveService->>DatabaseService: Execute move_quantity SP
-    DatabaseService->>Database: EXEC move_quantity
-    Database-->>DatabaseService: Transaction ID, Return Code
-    DatabaseService-->>QuantityMoveService: Move result
-    
-    QuantityMoveService-->>QuantityController: MoveQuantityResponse
-    QuantityController-->>Client: API Response
+    QuantityValidationService-->>MoveController: MoveValidationResponse
+    MoveController-->>Client: API Response
 ```
 
 **Steps**:
-1. **FIFO Check**: Validate that oldest lot is being used (if enabled)
+1. **Validate Source Stock**: Check if source location has sufficient quantity
+2. **Validate Target Location**: Ensure target location exists and is valid
+3. **Return Result**: Return validation status with error message if invalid
+
+---
+
+### 2. Quantity Move Workflow
+
+**Purpose**: Move quantity from source to target location with automatic validation.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant MoveController
+    participant QuantityMoveService
+    participant QuantityValidationService
+    participant DatabaseService
+    participant Database
+
+    Client->>MoveController: POST /api/move
+    MoveController->>QuantityValidationService: ValidateMoveAsync
+    
+    QuantityValidationService->>QuantityValidationService: ValidateSourceStockAsync
+    QuantityValidationService->>DatabaseService: Query lot_loc_mst
+    DatabaseService->>Database: SELECT qty_on_hand
+    Database-->>DatabaseService: Source quantity
+    DatabaseService-->>QuantityValidationService: Source validation
+    
+    QuantityValidationService->>QuantityValidationService: ValidateTargetLocationAsync
+    QuantityValidationService->>DatabaseService: Query location_mst
+    DatabaseService->>Database: SELECT loc
+    Database-->>DatabaseService: Location data
+    DatabaseService-->>QuantityValidationService: Target validation
+    
+    QuantityValidationService-->>MoveController: Move validation result
+    
+    alt Validation Failed
+        MoveController-->>Client: Error Response
+    else Validation Success
+        MoveController->>QuantityMoveService: MoveQuantityAsync
+        QuantityMoveService->>DatabaseService: Execute TR_Miktar_Ilerlet SP
+        DatabaseService->>Database: EXEC TR_Miktar_Ilerlet
+        Database-->>DatabaseService: Transaction ID, Return Code
+        DatabaseService-->>QuantityMoveService: Move result
+        QuantityMoveService-->>MoveController: MoveQuantityResponse
+        MoveController-->>Client: Success Response
+    end
+```
+
+**Steps**:
+1. **Automatic Validation**: Validate move before execution
 2. **Source Validation**: Verify source has sufficient stock
 3. **Target Validation**: Verify target location is valid
-4. **Execute Move**: Call stored procedure to perform the move
+4. **Execute Move**: Call `TR_Miktar_Ilerlet` stored procedure to perform the move
 5. **Return Result**: Provide transaction ID and status
 
 ---
 
-### 3. FIFO Compliance Check Workflow
+### 3. Stock Lookup by Barcode Workflow
 
-**Purpose**: Ensure First-In-First-Out compliance for lot tracking.
-
-```mermaid
-flowchart TD
-    Start([FIFO Validation Request]) --> GetOldestLot[Get Oldest Lot from fifo_summary]
-    GetOldestLot --> CheckExists{Oldest Lot<br/>Exists?}
-    
-    CheckExists -->|No| Compliant[Return: Compliant<br/>No older lots]
-    CheckExists -->|Yes| CompareLots{Current Lot ==<br/>Oldest Lot?}
-    
-    CompareLots -->|Yes| Compliant
-    CompareLots -->|No| Warning[Return: Non-Compliant<br/>Warning Message]
-    
-    Compliant --> End([Return Validation Response])
-    Warning --> End
-    
-    style Compliant fill:#90EE90
-    style Warning fill:#FFB6C1
-```
-
-**Explanation**:
-- Queries `fifo_summary` table to find oldest lot for the item
-- Compares current lot with oldest lot
-- Returns compliance status and warning if non-compliant
-- Used before quantity moves to enforce FIFO policy
-
----
-
-### 4. Barcode Parsing and Lookup Workflow
-
-**Purpose**: Parse barcode format and lookup item information.
+**Purpose**: Get stock locations and quantities by parsing barcode.
 
 ```mermaid
 flowchart TD
-    Start([Barcode String]) --> Parse[Split by '%' delimiter]
-    Parse --> CheckFormat{Format Valid?<br/>item%lot%quantity}
+    Start([Barcode: item%lot]) --> Parse[Split by '%' delimiter]
+    Parse --> CheckFormat{Format Valid?<br/>item%lot}
     
     CheckFormat -->|No| Error1[Return: Invalid Format]
-    CheckFormat -->|Yes| Extract[Extract: Item, Lot, Quantity]
+    CheckFormat -->|Yes| Extract[Extract: Item Code, Lot Number]
     
-    Extract --> Lookup[Lookup Item in item_mst]
-    Lookup --> CheckFound{Item Found?}
+    Extract --> Query[Query lot_loc_mst for locations]
+    Query --> CheckFound{Locations<br/>Found?}
     
-    CheckFound -->|No| Error2[Return: Item Not Found]
-    CheckFound -->|Yes| Success[Return: Item Info + Lot + Quantity]
+    CheckFound -->|No| Error2[Return: No Stock Found]
+    CheckFound -->|Yes| Success[Return: Locations with Quantities]
     
     Error1 --> End([Response])
     Error2 --> End
@@ -383,9 +311,9 @@ flowchart TD
     style Error2 fill:#FFB6C1
 ```
 
-**Barcode Format**: `ITEM_CODE%LOT_NUMBER%QUANTITY`
-- Example: `ABC123%LOT001%100.50`
-- Quantity is optional
+**Barcode Format**: `item_code%lot_num`
+- Example: `ITEM123%LOT456`
+- Returns all locations with stock for the item/lot combination
 
 ---
 
@@ -553,11 +481,12 @@ Different strategies for different scenarios:
   "target_location": "LOC002",
   "quantity": 100.50,
   "warehouse_code": "WHSE01",
-  "site_reference": "SITE01"
+  "site_reference": "SITE01",
+  "document_number": "DOC123"
 }
 ```
 
-**StockMoveValidationRequest**
+**MoveValidationRequest**
 ```json
 {
   "item_code": "ABC123",
@@ -565,22 +494,25 @@ Different strategies for different scenarios:
   "source_location": "LOC001",
   "target_location": "LOC002",
   "quantity": 100.50,
-  "warehouse_code": "WHSE01",
-  "site_reference": "SITE01"
+  "warehouse_code": "WHSE01"
+}
+```
+
+**LoginRequest**
+```json
+{
+  "username": "user123",
+  "password": "password123"
 }
 ```
 
 ### Key Response Models
 
-**CombinedValidationResponse**
+**MoveValidationResponse**
 ```json
 {
   "is_valid": true,
-  "item_validation": { "is_valid": true, "is_lot_tracked": true },
-  "lot_validation": { "is_valid": true },
-  "source_location_validation": { "is_valid": true },
-  "target_location_validation": { "is_valid": true },
-  "stock_availability": { "is_available": true, "available_quantity": 150.00 }
+  "error_message": null
 }
 ```
 
@@ -594,6 +526,39 @@ Different strategies for different scenarios:
 }
 ```
 
+**LocationsResponse** (Stock by Barcode)
+```json
+{
+  "item_code": "ITEM123",
+  "lot_number": "LOT456",
+  "locations": [
+    {
+      "location_code": "LOC001",
+      "quantity": 100.50
+    },
+    {
+      "location_code": "LOC002",
+      "quantity": 50.25
+    }
+  ]
+}
+```
+
+**LoginResponse**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 86400,
+  "user": {
+    "user_id": "hash_of_username",
+    "username": "user123",
+    "full_name": "John Doe",
+    "email": null,
+    "warehouse": "MAIN"
+  }
+}
+```
+
 ---
 
 ## Database Tables
@@ -604,12 +569,20 @@ Different strategies for different scenarios:
 - **item_mst**: Item master data (item definitions, lot tracking flag)
 - **location_mst**: Location master (location definitions, types)
 - **lot_mst**: Lot master (lot definitions, creation dates)
-- **fifo_summary**: FIFO summary (oldest lots per item/warehouse)
+- **TRM_FIFO_SUM**: FIFO summary (oldest lots per item/warehouse) - **legacy table name**
+- **TRM_EDIUSER**: User authentication table - **legacy table name**
+- **employee_mst**: Employee master data
+
+**Note**: The API uses legacy database table names for compatibility with the existing production database. See **[DATABASE_INTEGRATION.md](DATABASE_INTEGRATION.md)** for complete database documentation.
 
 ### Stored Procedures
 
-- **validate_stock**: Validates stock availability and lot tracking
-- **move_quantity**: Performs quantity movement between locations
+- **TR_Stok_Kontrol**: Validates stock availability and lot tracking - **legacy stored procedure**
+- **TR_Miktar_Ilerlet**: Performs quantity movement between locations - **legacy stored procedure**
+
+**Stored Procedure Parameters**:
+- `TR_Miktar_Ilerlet`: `@Item`, `@loc1`, `@lot1`, `@loc2`, `@qty`, `@DocumentNum`
+- `TR_Stok_Kontrol`: `@Item`, `@Lot`, `@Location`, `@Whse`
 
 ---
 
@@ -654,13 +627,22 @@ All endpoints require JWT authentication via `[Authorize]` attribute.
 
 The Quantity Move API provides a **modular, focused architecture** with:
 
-- **24 API endpoints** across 4 controllers
-- **7 service interfaces** with clear responsibilities
-- **30+ request/response models** with focused parameters
+- **5 API endpoints** across 4 controllers:
+  - Stock: 1 endpoint (barcode lookup)
+  - Move: 2 endpoints (validate, move)
+  - Auth: 1 endpoint (login)
+  - Health: 3 endpoints (health, ready, live)
+- **9 service interfaces** with clear responsibilities:
+  - Stock: Query, Validation, Location services
+  - Quantity: Move, Validation services
+  - FIFO: Compliance and summary services
+  - Barcode: Parsing and lookup services
+  - Composition: StockOperationService
+- **Request/response models** with focused parameters
 - **Composition patterns** for complex operations
 - **Comprehensive validation** at multiple levels
-- **FIFO compliance** support
-- **Barcode integration** for mobile scanning
+- **Legacy database compatibility** (TRM_EDIUSER, TRM_FIFO_SUM, TR_Miktar_Ilerlet, TR_Stok_Kontrol)
+- **Barcode integration** for mobile scanning (item%lot format)
 
 The architecture emphasizes:
 - ✅ Single Responsibility
@@ -668,4 +650,7 @@ The architecture emphasizes:
 - ✅ Composition Over Configuration
 - ✅ Clear Separation of Concerns
 - ✅ Easy Testing and Maintenance
+- ✅ Legacy Database Compatibility
+
+**Database Integration**: The API is designed to work with the existing legacy database schema. See **[DATABASE_INTEGRATION.md](DATABASE_INTEGRATION.md)** for complete database documentation including table structures, stored procedure parameters, and verification checklist.
 

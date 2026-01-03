@@ -69,13 +69,13 @@ Update `appsettings.json`:
       "ItemMaster": "item_mst",
       "LocationMaster": "location_mst",
       "LotMaster": "lot_mst",
-      "UserMaster": "user_master",
-      "FifoSummary": "fifo_summary"
+      "UserMaster": "TRM_EDIUSER",
+      "FifoSummary": "TRM_FIFO_SUM"
     }
   },
   "StoredProcedures": {
-    "ValidateStock": "validate_stock",
-    "MoveQuantity": "move_quantity"
+    "ValidateStock": "TR_Stok_Kontrol",
+    "MoveQuantity": "TR_Miktar_Ilerlet"
   },
   "Defaults": {
     "DefaultWarehouse": "MAIN",
@@ -108,55 +108,66 @@ The API will be available at `https://localhost:5001/api` (or configured port).
 
 ### Stock Operations (`/api/stock`)
 
-**Query Endpoints**:
-- `GET /api/stock/quantity` - Get quantity at location
-- `GET /api/stock/locations` - Get locations for item/lot
-- `GET /api/stock/locations/with-stock` - Get locations with stock
-- `GET /api/stock/current-location` - Get current location(s)
-- `GET /api/stock/summary` - Get stock summary
+- `GET /api/stock/{barcode}` - Get stock locations and quantities by barcode
+  - Barcode format: `item_code%lot_num` (e.g., `"ITEM123%LOT456"`)
+  - Returns locations with stock for the item/lot combination
 
-**Validation Endpoints**:
-- `POST /api/stock/validate/item` - Validate item
-- `POST /api/stock/validate/lot` - Validate lot
-- `POST /api/stock/validate/location` - Validate location
-- `POST /api/stock/validate/availability` - Validate stock availability
-- `POST /api/stock/validate/move` - Combined validation for move
+### Move Operations (`/api/move`)
 
-### Quantity Operations (`/api/quantity`)
+- `POST /api/move/validate` - Validate if a move operation is allowed
+  - Checks that source location has sufficient quantity and target location is valid
+- `POST /api/move` - Execute a move operation
+  - First validates the move, then executes it by calling the `TR_Miktar_Ilerlet` stored procedure
+  - Includes automatic validation before execution
 
-**Validation Endpoints**:
-- `POST /api/quantity/validate/source` - Validate source stock
-- `POST /api/quantity/validate/target` - Validate target location
-- `POST /api/quantity/validate/move` - Validate move operation
+### Authentication (`/api/auth`)
 
-**Move Endpoints**:
-- `POST /api/quantity/move` - Simple move
-- `POST /api/quantity/move/with-validation` - Move with validation
-- `POST /api/quantity/move/with-fifo` - Move with FIFO check
+- `POST /api/auth/login` - Authenticate user and get JWT token
+  - Public endpoint (no authentication required)
+  - Returns JWT token for subsequent API calls
 
-### FIFO Operations (`/api/fifo`)
+### Health Check (`/api/health`)
 
-- `GET /api/fifo/oldest-lot` - Get oldest lot for item
-- `POST /api/fifo/validate` - Validate FIFO compliance
-- `GET /api/fifo/summary` - Get FIFO summary
-
-### Barcode Operations (`/api/barcode`)
-
-- `POST /api/barcode/parse` - Parse barcode string
-- `POST /api/barcode/lookup` - Lookup item from barcode
+- `GET /api/health` - Basic health check (service is running)
+- `GET /api/health/ready` - Readiness check (service is ready to accept requests)
+- `GET /api/health/live` - Liveness check (service is alive)
+  - All health endpoints are public (no authentication required)
 
 ## Example Usage
 
-### Get Quantity at Location
+### Get Stock by Barcode
 
 ```bash
-GET /api/stock/quantity?item_code=ABC123&lot_number=LOT001&location_code=LOC001&warehouse_code=WHSE01
+GET /api/stock/ITEM123%LOT456
+Authorization: Bearer <your_token>
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "item_code": "ITEM123",
+    "lot_number": "LOT456",
+    "locations": [
+      {
+        "location_code": "LOC001",
+        "quantity": 100.50
+      },
+      {
+        "location_code": "LOC002",
+        "quantity": 50.25
+      }
+    ]
+  }
+}
 ```
 
 ### Move Quantity
 
 ```bash
-POST /api/quantity/move
+POST /api/move
+Authorization: Bearer <your_token>
 Content-Type: application/json
 
 {
@@ -166,14 +177,30 @@ Content-Type: application/json
   "target_location": "LOC002",
   "quantity": 100.50,
   "warehouse_code": "WHSE01",
-  "site_reference": "SITE01"
+  "site_reference": "SITE01",
+  "document_number": "DOC123"
 }
 ```
 
-### Validate Stock for Move
+**Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "success": true,
+    "transaction_id": 12345,
+    "return_code": 0,
+    "error_message": null
+  },
+  "message": "Move operation completed successfully"
+}
+```
+
+### Validate Move
 
 ```bash
-POST /api/stock/validate/move
+POST /api/move/validate
+Authorization: Bearer <your_token>
 Content-Type: application/json
 
 {
@@ -183,6 +210,17 @@ Content-Type: application/json
   "target_location": "LOC002",
   "quantity": 100.50,
   "warehouse_code": "WHSE01"
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "is_valid": true,
+    "error_message": null
+  }
 }
 ```
 
@@ -204,6 +242,12 @@ Content-Type: application/json
 
 - **[IIS_DEPLOYMENT.md](IIS_DEPLOYMENT.md)**: IIS deployment guide
 
+- **[DATABASE_INTEGRATION.md](DATABASE_INTEGRATION.md)**: Complete database integration documentation with:
+  - Table structures and column definitions
+  - Stored procedure parameters and usage
+  - Legacy database compatibility notes
+  - Verification checklist for production connection
+
 ## Design Principles
 
 1. **Single Responsibility**: Each method does one thing well
@@ -223,10 +267,10 @@ Content-Type: application/json
 backend/
 ├── Controllers/              # API controllers
 │   ├── StockController.cs
-│   ├── QuantityController.cs
-│   ├── FifoController.cs
-│   ├── BarcodeController.cs
-│   └── AuthController.cs
+│   ├── MoveController.cs
+│   ├── AuthController.cs
+│   ├── HealthController.cs
+│   └── BaseController.cs
 ├── Services/                 # Service layer
 │   ├── Base/                 # BaseService abstract class
 │   ├── Query/                # IQueryService and QueryService
@@ -248,18 +292,24 @@ backend/
 
 ## Database Schema
 
+The API is designed to work with the legacy database schema. See **[DATABASE_INTEGRATION.md](DATABASE_INTEGRATION.md)** for complete database documentation.
+
 ### Core Tables
 
 - `lot_loc_mst` - Lot location inventory
 - `item_mst` - Item master data
 - `location_mst` - Location master
 - `lot_mst` - Lot master
-- `fifo_summary` - FIFO summary
+- `TRM_FIFO_SUM` - FIFO summary (legacy table name)
+- `TRM_EDIUSER` - User authentication (legacy table name)
+- `employee_mst` - Employee master
 
 ### Stored Procedures
 
-- `validate_stock` - Stock validation
-- `move_quantity` - Quantity movement
+- `TR_Stok_Kontrol` - Stock validation (legacy stored procedure)
+- `TR_Miktar_Ilerlet` - Quantity movement (legacy stored procedure)
+
+**Note**: The API uses legacy database table and stored procedure names for compatibility with the existing production database.
 
 ## Authentication
 
