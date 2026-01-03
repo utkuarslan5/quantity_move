@@ -28,7 +28,7 @@ public static class TestHelpers
         }
 
         return new ConfigurationBuilder()
-            .AddInMemoryCollection(defaultSettings)
+            .AddInMemoryCollection(defaultSettings.Select(kvp => new KeyValuePair<string, string?>(kvp.Key, kvp.Value)))
             .Build();
     }
 

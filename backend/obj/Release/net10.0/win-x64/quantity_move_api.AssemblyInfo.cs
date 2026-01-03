@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("quantity_move_api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+28fb80f99483f2a9543b489c02b3bd5e3a59a5f5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+277287a92bc4541a0c7800c0456ba8f080bb82aa")]
 [assembly: System.Reflection.AssemblyProductAttribute("quantity_move_api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("quantity_move_api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

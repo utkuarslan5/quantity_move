@@ -34,11 +34,14 @@ public class MoveControllerTests : ControllerTestBase
             _mockLogger.Object,
             _configuration,
             _mockConfigurationService.Object);
+        
+        SetupHttpContext(_controller);
     }
 
     #region ValidateMove Tests
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task ValidateMove_WithValidRequest_ReturnsOk()
     {
         // Arrange
@@ -76,6 +79,7 @@ public class MoveControllerTests : ControllerTestBase
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task ValidateMove_WithInvalidModelState_ReturnsBadRequest()
     {
         // Arrange
@@ -90,6 +94,7 @@ public class MoveControllerTests : ControllerTestBase
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task ValidateMove_WithException_ReturnsInternalServerError()
     {
         // Arrange
@@ -118,6 +123,7 @@ public class MoveControllerTests : ControllerTestBase
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task ValidateMove_UsesDefaultWarehouse()
     {
         // Arrange
@@ -151,6 +157,7 @@ public class MoveControllerTests : ControllerTestBase
     #region Move Tests
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task Move_WithValidRequest_ReturnsOk()
     {
         // Arrange
@@ -180,6 +187,7 @@ public class MoveControllerTests : ControllerTestBase
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task Move_WithInvalidModelState_ReturnsBadRequest()
     {
         // Arrange
@@ -194,6 +202,7 @@ public class MoveControllerTests : ControllerTestBase
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task Move_WithValidationFailure_ReturnsBadRequest()
     {
         // Arrange
@@ -224,12 +233,15 @@ public class MoveControllerTests : ControllerTestBase
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task Move_WhenServiceReturnsFailure_ReturnsBadRequest()
     {
         // Arrange
         var request = TestHelpers.CreateMoveQuantityRequest();
         var validationResponse = new MoveValidationResponse { IsValid = true };
+        var errorMessage = "Move operation failed";
         var moveResponse = TestHelpers.CreateMoveQuantityResponse(success: false, returnCode: 1);
+        moveResponse.ErrorMessage = errorMessage;
 
         _mockConfigurationService.Setup(x => x.GetDefaultWarehouse())
             .Returns("WH001");
@@ -248,10 +260,17 @@ public class MoveControllerTests : ControllerTestBase
         result.Result.Should().BeOfType<BadRequestObjectResult>();
         var badRequest = result.Result as BadRequestObjectResult;
         var response = badRequest!.Value as ApiResponse<MoveQuantityResponse>;
-        response!.Data!.Success.Should().BeFalse();
+        
+        // Verify ErrorResponse structure (not SuccessResponse)
+        response!.Success.Should().BeFalse();
+        response.Message.Should().Contain(errorMessage);
+        response.Errors.Should().NotBeNull();
+        response.Errors!.Should().Contain(errorMessage);
+        response.Data.Should().BeNull(); // ErrorResponse sets Data to null
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task Move_WithException_ReturnsInternalServerError()
     {
         // Arrange
@@ -278,6 +297,7 @@ public class MoveControllerTests : ControllerTestBase
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task Move_UsesDefaultWarehouseAndSite()
     {
         // Arrange
@@ -314,6 +334,7 @@ public class MoveControllerTests : ControllerTestBase
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task Move_ValidatesBeforeMoving()
     {
         // Arrange

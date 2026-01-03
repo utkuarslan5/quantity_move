@@ -1,9 +1,11 @@
 using Dapper;
+using quantity_move_api.Common;
 using quantity_move_api.Common.Constants;
 using quantity_move_api.Models;
 using quantity_move_api.Services.Base;
 using quantity_move_api.Services.Fifo;
 using System.Data;
+using Serilog.Context;
 
 namespace quantity_move_api.Services.Quantity;
 
@@ -26,36 +28,75 @@ public class QuantityMoveService : BaseService<QuantityMoveService>, IQuantityMo
 
     public async Task<MoveQuantityResponse> MoveQuantityAsync(MoveQuantityRequest request)
     {
-        Logger.LogInformation("Moving quantity for item {ItemCode} from {SourceLocation} to {TargetLocation}, quantity {Quantity}", 
-            request.ItemCode, request.SourceLocation, request.TargetLocation, request.Quantity);
-
-        var procedureName = ConfigurationService.GetStoredProcedureName("MoveQuantity");
-
-        var parameters = new DynamicParameters();
-        parameters.Add("@Item", request.ItemCode);
-        parameters.Add("@loc1", request.SourceLocation);
-        parameters.Add("@lot1", request.SourceLotNumber);
-        parameters.Add("@loc2", request.TargetLocation);
-        parameters.Add("@qty", request.Quantity);
-        parameters.Add("@DocumentNum", request.DocumentNumber ?? (object)DBNull.Value);
-
-        parameters.Add("@transaction_id", dbType: DbType.Int64, direction: ParameterDirection.Output);
-        parameters.Add("@return_code", dbType: DbType.Int32, direction: ParameterDirection.Output);
-        parameters.Add("@error_message", dbType: DbType.String, size: 500, direction: ParameterDirection.Output);
-
-        await DatabaseService.ExecuteStoredProcedureNonQueryAsync(procedureName, parameters).ConfigureAwait(false);
-
-        var transactionId = parameters.Get<long?>("@transaction_id");
-        var returnCode = parameters.Get<int>("@return_code");
-        var errorMessage = parameters.Get<string>("@error_message");
-
-        return new MoveQuantityResponse
+        var correlationIdValue = System.Diagnostics.Activity.Current?.Id ?? Guid.NewGuid().ToString();
+        using (LogContext.PushProperty("CorrelationId", correlationIdValue))
         {
-            Success = returnCode == 0,
-            TransactionId = transactionId,
-            ReturnCode = returnCode,
-            ErrorMessage = errorMessage
-        };
+            Logger.LogInformation(
+                "Moving quantity for item {ItemCode} from {SourceLocation} to {TargetLocation}, quantity {Quantity}, warehouse {WarehouseCode}, lot {LotNumber}",
+                request.ItemCode, 
+                request.SourceLocation, 
+                request.TargetLocation, 
+                request.Quantity,
+                request.WarehouseCode ?? "N/A",
+                request.SourceLotNumber ?? "N/A");
+
+            BusinessEventLogger.LogMoveOperationStarted(
+                Logger,
+                request.ItemCode,
+                request.SourceLocation,
+                request.TargetLocation,
+                request.Quantity,
+                request.WarehouseCode,
+                request.SourceLotNumber,
+                correlationIdValue);
+
+            var procedureName = ConfigurationService.GetStoredProcedureName("MoveQuantity");
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@Item", request.ItemCode);
+            parameters.Add("@loc1", request.SourceLocation);
+            parameters.Add("@lot1", request.SourceLotNumber);
+            parameters.Add("@loc2", request.TargetLocation);
+            parameters.Add("@qty", request.Quantity);
+            parameters.Add("@DocumentNum", request.DocumentNumber ?? (object)DBNull.Value);
+
+            parameters.Add("@transaction_id", dbType: DbType.Int64, direction: ParameterDirection.Output);
+            parameters.Add("@return_code", dbType: DbType.Int32, direction: ParameterDirection.Output);
+            parameters.Add("@error_message", dbType: DbType.String, size: 500, direction: ParameterDirection.Output);
+
+            await DatabaseService.ExecuteStoredProcedureNonQueryAsync(procedureName, parameters).ConfigureAwait(false);
+
+            var transactionId = parameters.Get<long?>("@transaction_id");
+            var returnCode = parameters.Get<int>("@return_code");
+            var errorMessage = parameters.Get<string>("@error_message");
+
+            var success = returnCode == 0;
+            var response = new MoveQuantityResponse
+            {
+                Success = success,
+                TransactionId = transactionId,
+                ReturnCode = returnCode,
+                ErrorMessage = errorMessage
+            };
+
+            Logger.LogInformation(
+                "Move operation completed. Item: {ItemCode}, TransactionId: {TransactionId}, ReturnCode: {ReturnCode}, Success: {Success}, ErrorMessage: {ErrorMessage}",
+                request.ItemCode,
+                transactionId,
+                returnCode,
+                success,
+                errorMessage ?? "N/A");
+
+            BusinessEventLogger.LogMoveOperationCompleted(
+                Logger,
+                success,
+                transactionId,
+                returnCode,
+                errorMessage,
+                correlationIdValue);
+
+            return response;
+        }
     }
 
     public async Task<MoveQuantityResponse> MoveQuantityWithValidationAsync(MoveQuantityRequest request)
@@ -98,6 +139,12 @@ public class QuantityMoveService : BaseService<QuantityMoveService>, IQuantityMo
             if (!fifoValidation.IsCompliant && !string.IsNullOrEmpty(fifoValidation.WarningMessage))
             {
                 Logger.LogWarning("FIFO violation detected: {WarningMessage}", fifoValidation.WarningMessage);
+                BusinessEventLogger.LogFifoViolation(
+                    Logger,
+                    request.ItemCode,
+                    request.SourceLotNumber ?? "N/A",
+                    fifoValidation.WarningMessage,
+                    System.Diagnostics.Activity.Current?.Id);
                 // Continue with move but log warning
             }
         }

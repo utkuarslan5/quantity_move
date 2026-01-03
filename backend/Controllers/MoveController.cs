@@ -100,9 +100,9 @@ public class MoveController : BaseController
 
             if (!response.Success)
             {
-                return BadRequest(ApiResponse<MoveQuantityResponse>.SuccessResponse(
-                    response, 
-                    response.ErrorMessage ?? "Move operation failed"));
+                return BadRequest(ApiResponse<MoveQuantityResponse>.ErrorResponse(
+                    response.ErrorMessage ?? "Move operation failed",
+                    new List<string> { response.ErrorMessage ?? "Move operation failed" }));
             }
 
             return Ok(ApiResponse<MoveQuantityResponse>.SuccessResponse(response, "Move operation completed successfully"));

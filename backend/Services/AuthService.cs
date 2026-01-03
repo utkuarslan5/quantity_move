@@ -81,8 +81,8 @@ public class AuthService : BaseService<AuthService>, IAuthService
             }
 
             // Set UserId from username (since TRM_EDIUSER doesn't have a numeric ID)
-            // Use hash of username as a simple ID
-            user.UserId = username.GetHashCode();
+            // Use FNV-1a hash algorithm for deterministic, collision-resistant integer ID
+            user.UserId = ComputeUserIdHash(username);
 
             Logger.LogInformation("User {Username} validated successfully", username);
             return user;
@@ -92,5 +92,31 @@ public class AuthService : BaseService<AuthService>, IAuthService
             Logger.LogError(ex, "Error validating user {Username}", username);
             return null;
         }
+    }
+
+    /// <summary>
+    /// Computes a deterministic integer hash from a username using FNV-1a algorithm.
+    /// This provides better collision resistance than GetHashCode() while maintaining determinism.
+    /// The hash is guaranteed to be a positive integer (using bitwise AND with 0x7FFFFFFF).
+    /// </summary>
+    /// <param name="username">The username to hash</param>
+    /// <returns>A deterministic positive integer hash of the username</returns>
+    private static int ComputeUserIdHash(string username)
+    {
+        if (string.IsNullOrEmpty(username))
+            return 0;
+
+        const uint FNV_OFFSET_BASIS = 2166136261u;
+        const uint FNV_PRIME = 16777619u;
+        
+        uint hash = FNV_OFFSET_BASIS;
+        foreach (byte b in System.Text.Encoding.UTF8.GetBytes(username))
+        {
+            hash ^= b;
+            hash *= FNV_PRIME;
+        }
+        
+        // Convert to signed int, ensuring positive value
+        return (int)(hash & 0x7FFFFFFF);
     }
 }

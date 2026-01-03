@@ -3,3 +3,19 @@ api/bin/
 api/obj/
 logs/
 *.log
+
+# Test results and coverage
+backend/quantity_move_api.Tests/TestResults/
+backend/quantity_move_api.Tests/coverage/
+backend/quantity_move_api.Tests/**/TestResults/
+backend/quantity_move_api.Tests/**/coverage/
+*.coverage
+*.coveragexml
+*.opencover
+*.trx
+*.cobertura.xml
+
+# Build results
+backend/bin/
+backend/obj/
+backend/publish/

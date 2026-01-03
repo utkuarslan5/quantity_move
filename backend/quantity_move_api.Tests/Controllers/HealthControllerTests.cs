@@ -127,10 +127,10 @@ public class HealthControllerTests
     }
 
     [Fact]
-    public void Live_ReturnsAliveStatus()
+    public void Get_ReturnsAliveStatus()
     {
         // Act
-        var result = _controller.Live();
+        var result = _controller.Get();
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();

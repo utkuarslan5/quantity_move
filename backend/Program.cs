@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
+using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using Microsoft.OpenApi;
 using quantity_move_api.Services;
@@ -15,12 +18,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Configure Serilog
 var environment = builder.Environment.EnvironmentName;
+var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown";
+var processId = Environment.ProcessId;
+
 var loggerConfig = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
     .Enrich.WithEnvironmentName()
     .Enrich.WithMachineName()
-    .Enrich.WithProperty("Application", "quantity-move-api");
+    .Enrich.WithThreadId()
+    .Enrich.WithProperty("Application", "quantity-move-api")
+    .Enrich.WithProperty("Version", version)
+    .Enrich.WithProperty("ProcessId", processId);
 
 // Configure console sink based on environment
 if (environment == "Development")
@@ -44,6 +53,15 @@ Log.Logger = loggerConfig
         shared: true
     )
     .WriteTo.File(
+        path: "logs/app-structured-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30,
+        fileSizeLimitBytes: 100_000_000,
+        rollOnFileSizeLimit: true,
+        formatter: new CompactJsonFormatter(),
+        shared: true
+    )
+    .WriteTo.File(
         path: "logs/errors-.log",
         restrictedToMinimumLevel: LogEventLevel.Warning,
         rollingInterval: RollingInterval.Day,
@@ -57,6 +75,9 @@ Log.Logger = loggerConfig
 
 // Use Serilog for logging
 builder.Host.UseSerilog();
+
+// Validate critical configuration
+ValidateConfiguration(builder.Configuration);
 
 // Add services to the container
 builder.Services.AddControllers();
@@ -106,12 +127,49 @@ builder.Services.AddSwaggerGen(options =>
 // Add health checks with database connection check
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddHealthChecks()
-    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy())
+    .AddCheck("self", () => HealthCheckResult.Healthy())
     .AddSqlServer(
         connectionString ?? throw new InvalidOperationException("Connection string is not configured"),
         name: "database",
         tags: new[] { "db", "sql", "sqlserver" },
-        timeout: TimeSpan.FromSeconds(15));
+        timeout: TimeSpan.FromSeconds(15))
+    .AddCheck("memory", () =>
+    {
+        var memory = GC.GetTotalMemory(false);
+        var threshold = 500_000_000; // 500MB
+        var memoryMB = memory / 1024 / 1024;
+        if (memory < threshold)
+        {
+            return HealthCheckResult.Healthy($"Memory usage: {memoryMB}MB");
+        }
+        return HealthCheckResult.Degraded($"Memory usage high: {memoryMB}MB");
+    })
+    .AddCheck("disk", () =>
+    {
+        try
+        {
+            var logsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "logs");
+            if (!Directory.Exists(logsDirectory))
+            {
+                Directory.CreateDirectory(logsDirectory);
+            }
+            
+            var drive = new DriveInfo(Path.GetPathRoot(logsDirectory) ?? "/");
+            var freeSpaceGB = drive.AvailableFreeSpace / (1024.0 * 1024.0 * 1024.0);
+            var totalSpaceGB = drive.TotalSize / (1024.0 * 1024.0 * 1024.0);
+            
+            if (freeSpaceGB < 1.0) // Less than 1GB free
+            {
+                return HealthCheckResult.Unhealthy($"Low disk space: {freeSpaceGB:F2}GB free of {totalSpaceGB:F2}GB");
+            }
+            
+            return HealthCheckResult.Healthy($"Disk space: {freeSpaceGB:F2}GB free of {totalSpaceGB:F2}GB");
+        }
+        catch (Exception ex)
+        {
+            return HealthCheckResult.Degraded($"Unable to check disk space: {ex.Message}");
+        }
+    });
 
 // Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -170,13 +228,17 @@ builder.Services.AddScoped<IStockQueryService, StockQueryService>();
 builder.Services.AddScoped<IQuantityMoveService, QuantityMoveService>();
 builder.Services.AddScoped<IQuantityValidationService, QuantityValidationService>();
 
+// Register metrics service as singleton (in-memory metrics)
+builder.Services.AddSingleton<IMetricsService, MetricsService>();
+
 var app = builder.Build();
 
 // Configure path base for /api
 app.UsePathBase(new PathString("/api"));
 
 // Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
+var swaggerEnabled = builder.Configuration.GetValue<bool>("Swagger:Enabled", false);
+if (app.Environment.IsDevelopment() || swaggerEnabled)
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -216,5 +278,60 @@ finally
 }
 
 // Make Program class accessible for integration tests
-public partial class Program { }
+public partial class Program 
+{
+    /// <summary>
+    /// Validates critical configuration values at startup.
+    /// Throws InvalidOperationException if required configuration is missing.
+    /// </summary>
+    private static void ValidateConfiguration(IConfiguration configuration)
+    {
+        // Validate database connection string
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            throw new InvalidOperationException(
+                "Required configuration 'ConnectionStrings:DefaultConnection' is missing or empty.");
+        }
+
+        // Validate JWT settings
+        var jwtSettings = configuration.GetSection("Jwt");
+        var secretKey = jwtSettings["SecretKey"];
+        if (string.IsNullOrEmpty(secretKey))
+        {
+            throw new InvalidOperationException(
+                "Required configuration 'Jwt:SecretKey' is missing or empty.");
+        }
+
+        var issuer = jwtSettings["Issuer"];
+        if (string.IsNullOrEmpty(issuer))
+        {
+            throw new InvalidOperationException(
+                "Required configuration 'Jwt:Issuer' is missing or empty.");
+        }
+
+        var audience = jwtSettings["Audience"];
+        if (string.IsNullOrEmpty(audience))
+        {
+            throw new InvalidOperationException(
+                "Required configuration 'Jwt:Audience' is missing or empty.");
+        }
+
+        // Validate required stored procedure names
+        var storedProcedures = configuration.GetSection("StoredProcedures");
+        var moveQuantityProcedure = storedProcedures["MoveQuantity"];
+        if (string.IsNullOrEmpty(moveQuantityProcedure))
+        {
+            throw new InvalidOperationException(
+                "Required configuration 'StoredProcedures:MoveQuantity' is missing or empty.");
+        }
+
+        var validateStockProcedure = storedProcedures["ValidateStock"];
+        if (string.IsNullOrEmpty(validateStockProcedure))
+        {
+            throw new InvalidOperationException(
+                "Required configuration 'StoredProcedures:ValidateStock' is missing or empty.");
+        }
+    }
+}
 

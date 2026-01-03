@@ -1,4 +1,5 @@
 using Dapper;
+using quantity_move_api.Common;
 using quantity_move_api.Common.Constants;
 using quantity_move_api.Common.Exceptions;
 using quantity_move_api.Models;
@@ -44,15 +45,27 @@ public class QuantityValidationService : BaseService<QuantityValidationService>,
 
         if (availableQuantity < quantity)
         {
+            var errorMessage = $"Insufficient stock at source location. Available: {availableQuantity}, Required: {quantity}";
             Logger.LogWarning("Insufficient stock at source location {SourceLocation}. Available: {Available}, Required: {Required}", 
                 sourceLocation, availableQuantity, quantity);
+            BusinessEventLogger.LogValidationFailed(
+                Logger,
+                "SourceStock",
+                errorMessage,
+                itemCode,
+                System.Diagnostics.Activity.Current?.Id);
             return new ValidationResponse
             {
                 IsValid = false,
-                ErrorMessage = $"Insufficient stock at source location. Available: {availableQuantity}, Required: {quantity}"
+                ErrorMessage = errorMessage
             };
         }
 
+        BusinessEventLogger.LogValidationPassed(
+            Logger,
+            "SourceStock",
+            itemCode,
+            System.Diagnostics.Activity.Current?.Id);
         return new ValidationResponse
         {
             IsValid = true
@@ -75,14 +88,26 @@ public class QuantityValidationService : BaseService<QuantityValidationService>,
 
         if (count == 0)
         {
+            var errorMessage = $"Target location {targetLocation} not found";
             Logger.LogWarning("Target location {TargetLocation} not found", targetLocation);
+            BusinessEventLogger.LogValidationFailed(
+                Logger,
+                "TargetLocation",
+                errorMessage,
+                itemCode,
+                System.Diagnostics.Activity.Current?.Id);
             return new ValidationResponse
             {
                 IsValid = false,
-                ErrorMessage = $"Target location {targetLocation} not found"
+                ErrorMessage = errorMessage
             };
         }
 
+        BusinessEventLogger.LogValidationPassed(
+            Logger,
+            "TargetLocation",
+            itemCode,
+            System.Diagnostics.Activity.Current?.Id);
         return new ValidationResponse
         {
             IsValid = true

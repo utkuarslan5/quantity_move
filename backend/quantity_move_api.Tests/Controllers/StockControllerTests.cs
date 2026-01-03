@@ -31,9 +31,12 @@ public class StockControllerTests : ControllerTestBase
             _mockLogger.Object,
             _configuration,
             _mockConfigurationService.Object);
+        
+        SetupHttpContext(_controller);
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task GetStockByBarcode_WithValidBarcode_ReturnsOk()
     {
         // Arrange
@@ -67,6 +70,7 @@ public class StockControllerTests : ControllerTestBase
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task GetStockByBarcode_WithEmptyBarcode_ReturnsBadRequest()
     {
         // Arrange
@@ -83,6 +87,7 @@ public class StockControllerTests : ControllerTestBase
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task GetStockByBarcode_WithInvalidFormat_ReturnsBadRequest()
     {
         // Arrange
@@ -100,6 +105,7 @@ public class StockControllerTests : ControllerTestBase
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task GetStockByBarcode_WithTooManyParts_ReturnsBadRequest()
     {
         // Arrange
@@ -113,6 +119,7 @@ public class StockControllerTests : ControllerTestBase
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task GetStockByBarcode_WithEmptyItemCode_ReturnsBadRequest()
     {
         // Arrange
@@ -126,6 +133,7 @@ public class StockControllerTests : ControllerTestBase
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task GetStockByBarcode_WithEmptyLotNumber_ReturnsBadRequest()
     {
         // Arrange
@@ -139,6 +147,7 @@ public class StockControllerTests : ControllerTestBase
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task GetStockByBarcode_WithWhitespace_TrimsCorrectly()
     {
         // Arrange
@@ -165,6 +174,7 @@ public class StockControllerTests : ControllerTestBase
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task GetStockByBarcode_WithException_ReturnsInternalServerError()
     {
         // Arrange
@@ -187,6 +197,7 @@ public class StockControllerTests : ControllerTestBase
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task GetStockByBarcode_UsesDefaultWarehouse()
     {
         // Arrange

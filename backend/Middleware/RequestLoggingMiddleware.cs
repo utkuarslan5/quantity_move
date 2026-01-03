@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 using Serilog.Context;
+using quantity_move_api.Services;
 
 namespace quantity_move_api.Middleware;
 
@@ -11,12 +12,15 @@ public class RequestLoggingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<RequestLoggingMiddleware> _logger;
-    private const int MaxBodyLength = 1024; // 1KB max body length to log
+    private readonly IMetricsService? _metricsService;
+    private const int MaxBodyLengthBytes = 1024; // 1KB max body length to log
+    private const int SlowRequestThresholdMs = 1000; // Requests taking longer than 1 second are considered slow
 
-    public RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggingMiddleware> logger)
+    public RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggingMiddleware> logger, IMetricsService? metricsService = null)
     {
         _next = next;
         _logger = logger;
+        _metricsService = metricsService;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -66,6 +70,25 @@ public class RequestLoggingMiddleware
                     stopwatch.Stop();
                     var duration = stopwatch.ElapsedMilliseconds;
 
+                    // Record metrics
+                    if (_metricsService != null)
+                    {
+                        var endpoint = $"{context.Request.Method} {context.Request.Path}";
+                        _metricsService.RecordRequest(endpoint, context.Response.StatusCode, duration);
+                        
+                        // Track slow requests
+                        if (duration > SlowRequestThresholdMs)
+                        {
+                            _metricsService.IncrementError("SlowRequest");
+                        }
+                        
+                        // Track errors
+                        if (context.Response.StatusCode >= 400)
+                        {
+                            _metricsService.IncrementError($"HttpError_{context.Response.StatusCode}");
+                        }
+                    }
+
                     // Log response
                     var responseBodyContent = await CaptureResponseBodyAsync(context.Response);
                     
@@ -75,24 +98,28 @@ public class RequestLoggingMiddleware
                     if (logLevel == LogLevel.Warning || logLevel == LogLevel.Error)
                     {
                         _logger.Log(logLevel,
-                            "HTTP {Method} {Path} responded {StatusCode} in {Duration}ms. User: {Username}. RequestBody: {RequestBody}, ResponseBody: {ResponseBody}",
+                            "HTTP {Method} {Path} responded {StatusCode} in {Duration}ms. User: {Username}. RequestBody: {RequestBody}, ResponseBody: {ResponseBody} | ContentLength: {ContentLength} | CorrelationId: {CorrelationId}",
                             context.Request.Method,
                             context.Request.Path,
                             context.Response.StatusCode,
                             duration,
                             username,
                             SanitizeBody(requestBody),
-                            SanitizeBody(responseBodyContent));
+                            SanitizeBody(responseBodyContent),
+                            context.Response.ContentLength ?? 0,
+                            correlationId);
                     }
                     else
                     {
                         _logger.Log(logLevel,
-                            "HTTP {Method} {Path} responded {StatusCode} in {Duration}ms. User: {Username}",
+                            "HTTP {Method} {Path} responded {StatusCode} in {Duration}ms. User: {Username} | ContentLength: {ContentLength} | CorrelationId: {CorrelationId}",
                             context.Request.Method,
                             context.Request.Path,
                             context.Response.StatusCode,
                             duration,
-                            username);
+                            username,
+                            context.Response.ContentLength ?? 0,
+                            correlationId);
                     }
 
                     // Copy response body back to original stream
@@ -114,7 +141,7 @@ public class RequestLoggingMiddleware
         var body = await reader.ReadToEndAsync();
         request.Body.Position = 0;
 
-        return body.Length > MaxBodyLength ? body.Substring(0, MaxBodyLength) + "..." : body;
+        return body.Length > MaxBodyLengthBytes ? body.Substring(0, MaxBodyLengthBytes) + "..." : body;
     }
 
     private async Task<string?> CaptureResponseBodyAsync(HttpResponse response)
@@ -124,7 +151,7 @@ public class RequestLoggingMiddleware
         var body = await reader.ReadToEndAsync();
         response.Body.Seek(0, SeekOrigin.Begin);
 
-        return body.Length > MaxBodyLength ? body.Substring(0, MaxBodyLength) + "..." : body;
+        return body.Length > MaxBodyLengthBytes ? body.Substring(0, MaxBodyLengthBytes) + "..." : body;
     }
 
     private LogLevel DetermineLogLevel(int statusCode, long duration)
@@ -134,7 +161,7 @@ public class RequestLoggingMiddleware
             return LogLevel.Error;
         if (statusCode >= 400)
             return LogLevel.Warning;
-        if (duration > 1000) // Slow requests (>1 second)
+        if (duration > SlowRequestThresholdMs)
             return LogLevel.Warning;
         
         return LogLevel.Information;

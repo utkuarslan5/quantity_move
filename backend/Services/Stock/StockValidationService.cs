@@ -1,4 +1,5 @@
 using Dapper;
+using quantity_move_api.Common;
 using quantity_move_api.Common.Builders;
 using quantity_move_api.Common.Constants;
 using quantity_move_api.Models;
@@ -48,6 +49,12 @@ public class StockValidationService : BaseService<StockValidationService>, IStoc
         if (result == null)
         {
             Logger.LogWarning("Item {ItemCode} not found", itemCode);
+            BusinessEventLogger.LogValidationFailed(
+                Logger,
+                "Item",
+                $"Item {itemCode} not found",
+                itemCode,
+                System.Diagnostics.Activity.Current?.Id);
             return ValidationResponseBuilder.ItemNotFound(itemCode);
         }
 
@@ -55,6 +62,20 @@ public class StockValidationService : BaseService<StockValidationService>, IStoc
         if (!result.IsLotTracked)
         {
             result.ErrorMessage = "Item is not lot-tracked";
+            BusinessEventLogger.LogValidationFailed(
+                Logger,
+                "ItemLotTracking",
+                "Item is not lot-tracked",
+                itemCode,
+                System.Diagnostics.Activity.Current?.Id);
+        }
+        else
+        {
+            BusinessEventLogger.LogValidationPassed(
+                Logger,
+                "Item",
+                itemCode,
+                System.Diagnostics.Activity.Current?.Id);
         }
 
         return result;
@@ -79,9 +100,20 @@ public class StockValidationService : BaseService<StockValidationService>, IStoc
         if (count == 0)
         {
             Logger.LogWarning("Lot {LotNumber} not found for item {ItemCode}", lotNumber, itemCode);
+            BusinessEventLogger.LogValidationFailed(
+                Logger,
+                "Lot",
+                $"Lot {lotNumber} not found for item {itemCode}",
+                itemCode,
+                System.Diagnostics.Activity.Current?.Id);
             return ValidationResponseBuilder.LotNotFound(itemCode, lotNumber);
         }
 
+        BusinessEventLogger.LogValidationPassed(
+            Logger,
+            "Lot",
+            itemCode,
+            System.Diagnostics.Activity.Current?.Id);
         return ValidationResponseBuilder.LotSuccess(itemCode, lotNumber);
     }
 
@@ -111,10 +143,21 @@ public class StockValidationService : BaseService<StockValidationService>, IStoc
         if (result == null)
         {
             Logger.LogWarning("Location {LocationCode} not found", locationCode);
+            BusinessEventLogger.LogValidationFailed(
+                Logger,
+                "Location",
+                $"Location {locationCode} not found",
+                null,
+                System.Diagnostics.Activity.Current?.Id);
             return ValidationResponseBuilder.LocationNotFound(locationCode);
         }
 
         result.IsValid = true;
+        BusinessEventLogger.LogValidationPassed(
+            Logger,
+            "Location",
+            null,
+            System.Diagnostics.Activity.Current?.Id);
         return result;
     }
 
@@ -142,11 +185,23 @@ public class StockValidationService : BaseService<StockValidationService>, IStoc
         var isAvailable = availableQuantity >= requiredQuantity;
         if (!isAvailable)
         {
+            var errorMessage = $"Insufficient stock. Available: {availableQuantity}, Required: {requiredQuantity}";
             Logger.LogWarning("Insufficient stock for item {ItemCode} at location {LocationCode}. Available: {Available}, Required: {Required}", 
                 itemCode, locationCode, availableQuantity, requiredQuantity);
+            BusinessEventLogger.LogValidationFailed(
+                Logger,
+                "StockAvailability",
+                errorMessage,
+                itemCode,
+                System.Diagnostics.Activity.Current?.Id);
             return ValidationResponseBuilder.InsufficientStock(itemCode, lotNumber, locationCode, availableQuantity, requiredQuantity);
         }
 
+        BusinessEventLogger.LogValidationPassed(
+            Logger,
+            "StockAvailability",
+            itemCode,
+            System.Diagnostics.Activity.Current?.Id);
         return ValidationResponseBuilder.StockAvailable(itemCode, lotNumber, locationCode, availableQuantity, requiredQuantity);
     }
 
