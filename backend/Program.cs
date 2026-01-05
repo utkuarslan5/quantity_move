@@ -76,6 +76,48 @@ Log.Logger = loggerConfig
 // Use Serilog for logging
 builder.Host.UseSerilog();
 
+// Register unhandled exception handler for fatal errors that occur outside the request pipeline
+// This catches exceptions that occur in background threads, finalizers, or during app shutdown
+AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+{
+    try
+    {
+        var exception = e.ExceptionObject as Exception;
+        Log.Fatal(exception ?? new Exception("Unknown unhandled exception"),
+            "Unhandled exception occurred. IsTerminating: {IsTerminating}",
+            e.IsTerminating);
+    }
+    catch
+    {
+        // If logging fails, we can't do much, but at least try to write to console
+        Console.WriteLine($"FATAL: Unhandled exception occurred at {DateTime.UtcNow:O}");
+        if (e.ExceptionObject is Exception ex)
+        {
+            Console.WriteLine($"Exception: {ex.GetType().Name} - {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        }
+    }
+};
+
+// Register unobserved task exception handler for async exceptions that are not awaited
+// This catches exceptions in fire-and-forget tasks or tasks that are not properly awaited
+TaskScheduler.UnobservedTaskException += (sender, e) =>
+{
+    try
+    {
+        Log.Fatal(e.Exception,
+            "Unobserved task exception occurred. This indicates a task exception was not properly handled.");
+        e.SetObserved(); // Mark as observed to prevent app crash
+    }
+    catch
+    {
+        // If logging fails, fall back to console
+        Console.WriteLine($"FATAL: Unobserved task exception occurred at {DateTime.UtcNow:O}");
+        Console.WriteLine($"Exception: {e.Exception.GetType().Name} - {e.Exception.Message}");
+        e.SetObserved();
+    }
+};
+
 // Validate critical configuration
 ValidateConfiguration(builder.Configuration);
 
@@ -235,6 +277,11 @@ var app = builder.Build();
 
 // Configure path base for /api
 app.UsePathBase(new PathString("/api"));
+
+// Configure application-level exception handler
+// This catches exceptions that occur before or outside the ExceptionHandlingMiddleware
+// Examples: model binding errors, middleware exceptions, pipeline setup errors
+app.UseExceptionHandler("/api/error");
 
 // Configure the HTTP request pipeline
 var swaggerEnabled = builder.Configuration.GetValue<bool>("Swagger:Enabled", false);

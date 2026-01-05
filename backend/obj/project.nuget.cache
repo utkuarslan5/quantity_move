@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "1JHdIY2Ss/U=",
+  "dgSpecHash": "3Iso0+ARKVk=",
   "success": true,
   "projectFilePath": "/home/r00t/code/ekip/quantity_move/backend/quantity_move_api.csproj",
   "expectedPackageFiles": [
@@ -47,8 +47,7 @@
     "/home/r00t/.nuget/packages/system.identitymodel.tokens.jwt/8.0.1/system.identitymodel.tokens.jwt.8.0.1.nupkg.sha512",
     "/home/r00t/.nuget/packages/system.memory.data/8.0.1/system.memory.data.8.0.1.nupkg.sha512",
     "/home/r00t/.nuget/packages/system.security.cryptography.pkcs/9.0.4/system.security.cryptography.pkcs.9.0.4.nupkg.sha512",
-    "/home/r00t/.nuget/packages/system.security.cryptography.protecteddata/9.0.4/system.security.cryptography.protecteddata.9.0.4.nupkg.sha512",
-    "/home/r00t/.nuget/packages/microsoft.netcore.app.host.win-x64/10.0.0/microsoft.netcore.app.host.win-x64.10.0.0.nupkg.sha512"
+    "/home/r00t/.nuget/packages/system.security.cryptography.protecteddata/9.0.4/system.security.cryptography.protecteddata.9.0.4.nupkg.sha512"
   ],
   "logs": []
 }
