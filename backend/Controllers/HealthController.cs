@@ -8,7 +8,7 @@ using quantity_move_api.Services;
 namespace quantity_move_api.Controllers;
 
 [ApiController]
-[Route("api/health")]
+[Route("health")]
 [AllowAnonymous]
 public class HealthController : ControllerBase
 {

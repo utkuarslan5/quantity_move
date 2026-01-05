@@ -7,7 +7,7 @@ using quantity_move_api.Services;
 namespace quantity_move_api.Controllers;
 
 [ApiController]
-[Route("api/move")]
+[Route("move")]
 [Authorize]
 public class MoveController : BaseController
 {
@@ -76,35 +76,39 @@ public class MoveController : BaseController
             if (string.IsNullOrWhiteSpace(request.SiteReference))
                 request.SiteReference = GetDefaultSite(null);
 
-            // First validate the move
-            var validationRequest = new MoveValidationRequest
-            {
-                ItemCode = request.ItemCode,
-                LotNumber = request.SourceLotNumber,
-                SourceLocation = request.SourceLocation,
-                TargetLocation = request.TargetLocation,
-                Quantity = request.Quantity,
-                WarehouseCode = request.WarehouseCode
-            };
-
-            var validation = await _validationService.ValidateMoveAsync(validationRequest);
-            if (!validation.IsValid)
-            {
-                return BadRequest(ApiResponse<MoveQuantityResponse>.ErrorResponse(
-                    validation.ErrorMessage ?? "Move validation failed",
-                    new List<string> { validation.ErrorMessage ?? "Move validation failed" }));
-            }
-
-            // Proceed with move
-            var response = await _moveService.MoveQuantityAsync(request);
+            // Use MoveQuantityWithFifoCheckAsync to ensure FIFO compliance is checked
+            // This method performs FIFO validation, then standard validation, then executes the move
+            // Return codes:
+            //   -2: FIFO compliance validation failed
+            //   -1: Standard validation failed (invalid request parameters)
+            //    0: Success
+            //   >0: Database stored procedure error
+            var response = await _moveService.MoveQuantityWithFifoCheckAsync(request);
 
             if (!response.Success)
             {
-                // Return 422 Unprocessable Entity for business operation failures after validation passed
-                // This distinguishes operation failures from client request errors (400 Bad Request)
-                return UnprocessableEntity(ApiResponse<MoveQuantityResponse>.ErrorResponse(
-                    response.ErrorMessage ?? "Move operation failed",
-                    new List<string> { response.ErrorMessage ?? "Move operation failed" }));
+                // Handle different failure scenarios based on return code
+                if (response.ReturnCode == -1)
+                {
+                    // Validation failure - return 400 Bad Request for client errors
+                    return BadRequest(ApiResponse<MoveQuantityResponse>.ErrorResponse(
+                        response.ErrorMessage ?? "Move validation failed",
+                        new List<string> { response.ErrorMessage ?? "Move validation failed" }));
+                }
+                else if (response.ReturnCode == -2)
+                {
+                    // FIFO compliance failure - return 422 Unprocessable Entity for business rule violations
+                    return UnprocessableEntity(ApiResponse<MoveQuantityResponse>.ErrorResponse(
+                        response.ErrorMessage ?? "FIFO compliance validation failed",
+                        new List<string> { response.ErrorMessage ?? "FIFO compliance validation failed" }));
+                }
+                else
+                {
+                    // Other operation failures (database errors, etc.) - return 422 Unprocessable Entity
+                    return UnprocessableEntity(ApiResponse<MoveQuantityResponse>.ErrorResponse(
+                        response.ErrorMessage ?? "Move operation failed",
+                        new List<string> { response.ErrorMessage ?? "Move operation failed" }));
+                }
             }
 
             return Ok(ApiResponse<MoveQuantityResponse>.SuccessResponse(response, "Move operation completed successfully"));

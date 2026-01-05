@@ -5,7 +5,7 @@ using quantity_move_api.Services;
 namespace quantity_move_api.Controllers;
 
 [ApiController]
-[Route("api/metrics")]
+[Route("metrics")]
 [Authorize]
 public class MetricsController : ControllerBase
 {
