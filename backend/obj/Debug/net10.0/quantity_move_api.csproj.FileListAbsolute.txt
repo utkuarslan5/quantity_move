@@ -18,7 +18,6 @@
 /home/r00t/code/ekip/quantity_move/backend/bin/Debug/net10.0/Dapper.dll
 /home/r00t/code/ekip/quantity_move/backend/bin/Debug/net10.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
 /home/r00t/code/ekip/quantity_move/backend/bin/Debug/net10.0/Microsoft.AspNetCore.Mvc.Versioning.dll
-/home/r00t/code/ekip/quantity_move/backend/bin/Debug/net10.0/Microsoft.AspNetCore.OpenApi.dll
 /home/r00t/code/ekip/quantity_move/backend/bin/Debug/net10.0/Microsoft.Bcl.AsyncInterfaces.dll
 /home/r00t/code/ekip/quantity_move/backend/bin/Debug/net10.0/Microsoft.Bcl.Cryptography.dll
 /home/r00t/code/ekip/quantity_move/backend/bin/Debug/net10.0/Microsoft.Data.SqlClient.dll
@@ -94,3 +93,4 @@
 /home/r00t/code/ekip/quantity_move/backend/obj/Debug/net10.0/quantity_move_api.pdb
 /home/r00t/code/ekip/quantity_move/backend/obj/Debug/net10.0/quantity_move_api.genruntimeconfig.cache
 /home/r00t/code/ekip/quantity_move/backend/obj/Debug/net10.0/ref/quantity_move_api.dll
+/home/r00t/code/ekip/quantity_move/backend/bin/Debug/net10.0/Microsoft.AspNetCore.OpenApi.dll

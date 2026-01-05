@@ -7,7 +7,7 @@ using quantity_move_api.Services;
 namespace quantity_move_api.Controllers;
 
 [ApiController]
-[Route("move")]
+[Route("api/move")]
 [Authorize]
 public class MoveController : BaseController
 {

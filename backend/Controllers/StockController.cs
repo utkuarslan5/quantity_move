@@ -7,7 +7,7 @@ using quantity_move_api.Services;
 namespace quantity_move_api.Controllers;
 
 [ApiController]
-[Route("stock")]
+[Route("api/stock")]
 [Authorize]
 public class StockController : BaseController
 {

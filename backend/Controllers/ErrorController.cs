@@ -11,7 +11,7 @@ namespace quantity_move_api.Controllers;
 /// This endpoint is called when an unhandled exception occurs and is not caught by ExceptionHandlingMiddleware.
 /// </summary>
 [ApiController]
-[Route("error")]
+[Route("api/error")]
 public class ErrorController : ControllerBase
 {
     private readonly ILogger<ErrorController> _logger;

@@ -104,13 +104,6 @@ builder.Services.AddSwaggerGen(options =>
         Description = "API for warehouse quantity movement operations with lot tracking and FIFO compliance"
     });
 
-    // Tell Swagger the app is served under the /api path base
-    options.AddServer(new OpenApiServer
-    {
-        Url = "/api",
-        Description = "Path base configured via UsePathBase(\"/api\")"
-    });
-
     // Add JWT Bearer authentication to Swagger
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -118,12 +111,13 @@ builder.Services.AddSwaggerGen(options =>
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
+        Scheme = "bearer",
         BearerFormat = "JWT"
     });
 
     options.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
     {
+
         {
             new OpenApiSecuritySchemeReference("Bearer"),
             new List<string>()
@@ -243,26 +237,18 @@ builder.Services.AddSingleton<IMetricsService, MetricsService>();
 
 var app = builder.Build();
 
-// Configure path base for /api
-app.UsePathBase(new PathString("/api"));
-
 // Configure application-level exception handler
 // This catches exceptions that occur before or outside the ExceptionHandlingMiddleware
 // Examples: model binding errors, middleware exceptions, pipeline setup errors
 // Must be placed early in the pipeline to catch exceptions from all subsequent middleware
-// Note: Path is "/error" not "/api/error" because UsePathBase("/api") strips the path base before routing
-app.UseExceptionHandler("/error");
+app.UseExceptionHandler("/api/error");
 
 // Configure the HTTP request pipeline
 var swaggerEnabled = builder.Configuration.GetValue<bool>("Swagger:Enabled", false);
 if (app.Environment.IsDevelopment() || swaggerEnabled)
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        // Point Swagger UI at the JSON that already includes the /api path base
-        c.SwaggerEndpoint("/api/swagger/v1/swagger.json", "Quantity Move API v1");
-    });
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
