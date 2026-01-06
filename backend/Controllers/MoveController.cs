@@ -70,11 +70,21 @@ public class MoveController : BaseController
 
         try
         {
-            // Apply defaults if not provided
-            if (string.IsNullOrWhiteSpace(request.WarehouseCode))
-                request.WarehouseCode = GetDefaultWarehouse(null);
-            if (string.IsNullOrWhiteSpace(request.SiteReference))
-                request.SiteReference = GetDefaultSite(null);
+            // Apply defaults if not provided - create a new object to avoid mutating the input parameter
+            var requestWithDefaults = new MoveQuantityRequest
+            {
+                ItemCode = request.ItemCode,
+                SourceLotNumber = request.SourceLotNumber,
+                SourceLocation = request.SourceLocation,
+                TargetLocation = request.TargetLocation,
+                Quantity = request.Quantity,
+                WarehouseCode = string.IsNullOrWhiteSpace(request.WarehouseCode) 
+                    ? GetDefaultWarehouse(null) 
+                    : request.WarehouseCode,
+                SiteReference = string.IsNullOrWhiteSpace(request.SiteReference) 
+                    ? GetDefaultSite(null) 
+                    : request.SiteReference
+            };
 
             // Use MoveQuantityWithFifoCheckAsync to ensure FIFO compliance is checked
             // This method performs FIFO validation, then standard validation, then executes the move
@@ -83,7 +93,7 @@ public class MoveController : BaseController
             //   -1: Standard validation failed (invalid request parameters)
             //    0: Success
             //   >0: Database stored procedure error
-            var response = await _moveService.MoveQuantityWithFifoCheckAsync(request);
+            var response = await _moveService.MoveQuantityWithFifoCheckAsync(requestWithDefaults);
 
             if (!response.Success)
             {

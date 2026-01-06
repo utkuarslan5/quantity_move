@@ -26,7 +26,22 @@ public class RequestLoggingMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         var stopwatch = Stopwatch.StartNew();
-        var correlationId = context.Request.Headers["X-Correlation-ID"].ToString();
+        
+        // Generate or retrieve correlation ID
+        string correlationId;
+        if (!context.Request.Headers.ContainsKey("X-Correlation-ID") || 
+            string.IsNullOrEmpty(context.Request.Headers["X-Correlation-ID"].ToString()))
+        {
+            correlationId = Guid.NewGuid().ToString();
+            context.Request.Headers["X-Correlation-ID"] = correlationId;
+        }
+        else
+        {
+            correlationId = context.Request.Headers["X-Correlation-ID"].ToString() ?? Guid.NewGuid().ToString();
+        }
+        
+        // Set correlation ID in response header
+        context.Response.Headers["X-Correlation-ID"] = correlationId;
         
         // Enrich log context with request information
         using (LogContext.PushProperty("CorrelationId", correlationId))
@@ -141,6 +156,9 @@ public class RequestLoggingMiddleware
         var body = await reader.ReadToEndAsync();
         request.Body.Position = 0;
 
+        if (string.IsNullOrEmpty(body))
+            return null;
+
         return body.Length > MaxBodyLengthBytes ? body.Substring(0, MaxBodyLengthBytes) + "..." : body;
     }
 
@@ -150,6 +168,9 @@ public class RequestLoggingMiddleware
         using var reader = new StreamReader(response.Body, Encoding.UTF8, leaveOpen: true);
         var body = await reader.ReadToEndAsync();
         response.Body.Seek(0, SeekOrigin.Begin);
+
+        if (string.IsNullOrEmpty(body))
+            return null;
 
         return body.Length > MaxBodyLengthBytes ? body.Substring(0, MaxBodyLengthBytes) + "..." : body;
     }

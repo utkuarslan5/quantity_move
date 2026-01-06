@@ -3,6 +3,7 @@ using quantity_move_api.Models;
 using quantity_move_api.Services;
 using quantity_move_api.Common;
 using Serilog.Context;
+using System;
 
 namespace quantity_move_api.Controllers;
 
@@ -58,7 +59,8 @@ public abstract class BaseController : ControllerBase
                 .ToList();
             
             // Log validation errors with full model state
-            var correlationId = HttpContext.Request.Headers["X-Correlation-ID"].ToString();
+            var correlationId = HttpContext.Request.Headers["X-Correlation-ID"].ToString() 
+                ?? Guid.NewGuid().ToString();
             Logger.LogWarning(
                 "Model validation failed. Errors: {Errors} | CorrelationId: {CorrelationId} | Path: {Path} | Method: {Method}",
                 string.Join("; ", errors),
@@ -73,7 +75,8 @@ public abstract class BaseController : ControllerBase
 
     protected ActionResult<ApiResponse<T>> HandleError<T>(Exception ex, string operation)
     {
-        var correlationId = HttpContext.Request.Headers["X-Correlation-ID"].ToString();
+        var correlationId = HttpContext.Request.Headers["X-Correlation-ID"].ToString() 
+            ?? Guid.NewGuid().ToString();
         var username = HttpContext.User?.Identity?.Name ?? "Anonymous";
         
         // Create context object for logging

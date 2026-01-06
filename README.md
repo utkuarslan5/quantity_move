@@ -44,7 +44,7 @@ See [API_DOCUMENTATION.md](API_DOCUMENTATION.md) for complete architecture diagr
 
 ### Prerequisites
 
-- .NET 8.0 SDK
+- .NET 20.0 SDK
 - SQL Server (with required tables and stored procedures)
 - JWT secret key configured
 

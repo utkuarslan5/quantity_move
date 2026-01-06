@@ -201,7 +201,17 @@ public class DatabaseService : IDatabaseService
                 {
                     if (paramName.StartsWith("@"))
                     {
-                        result[paramName] = dynamicParameters.Get<object>(paramName) ?? string.Empty;
+                        // Safely retrieve parameter value with null checking
+                        try
+                        {
+                            var paramValue = dynamicParameters.Get<object>(paramName);
+                            result[paramName] = paramValue ?? string.Empty;
+                        }
+                        catch
+                        {
+                            // If parameter retrieval fails, use empty string
+                            result[paramName] = string.Empty;
+                        }
                     }
                 }
                 

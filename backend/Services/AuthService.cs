@@ -52,7 +52,10 @@ public class AuthService : BaseService<AuthService>, IAuthService
 
             // Validate employee exists (matches legacy app behavior)
             var defaultSite = ConfigurationService.GetDefaultSite();
-            var siteRef = string.IsNullOrEmpty(defaultSite) || defaultSite == "Default" ? "faz" : defaultSite;
+            // If defaultSite is null/empty or explicitly set to "Default", use "faz" as fallback
+            // Note: "Default" is treated as a special value indicating the default site should be used
+            // Otherwise use the configured site reference
+            var siteRef = (string.IsNullOrEmpty(defaultSite) || defaultSite == "Default") ? "faz" : defaultSite;
             var employeeQuery = @"SELECT TOP 1 
                 emp_num,
                 site_Ref,
@@ -76,7 +79,7 @@ public class AuthService : BaseService<AuthService>, IAuthService
                 // Set full name from employee record if available
                 if (user.FullName == null && employee.full_name != null)
                 {
-                    user.FullName = employee.full_name.ToString();
+                    user.FullName = employee.full_name?.ToString();
                 }
             }
 

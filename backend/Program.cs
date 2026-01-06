@@ -97,31 +97,21 @@ builder.Services.AddApiVersioning(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "Quantity Move API",
-        Version = "v1",
-        Description = "API for warehouse quantity movement operations with lot tracking and FIFO compliance"
-    });
 
     // Add JWT Bearer authentication to Swagger
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Enter your token in the text input below.\n\nExample: \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
+        Scheme = "bearer",
         BearerFormat = "JWT"
     });
 
-    options.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
     {
-
-        {
-            new OpenApiSecuritySchemeReference("Bearer"),
-            new List<string>()
-        }
+        [new OpenApiSecuritySchemeReference("bearer", document)] = []
     });
 });
 
@@ -133,44 +123,7 @@ builder.Services.AddHealthChecks()
         connectionString ?? throw new InvalidOperationException("Connection string is not configured"),
         name: "database",
         tags: new[] { "db", "sql", "sqlserver" },
-        timeout: TimeSpan.FromSeconds(15))
-    .AddCheck("memory", () =>
-    {
-        var memory = GC.GetTotalMemory(false);
-        var threshold = 500_000_000; // 500MB
-        var memoryMB = memory / 1024 / 1024;
-        if (memory < threshold)
-        {
-            return HealthCheckResult.Healthy($"Memory usage: {memoryMB}MB");
-        }
-        return HealthCheckResult.Degraded($"Memory usage high: {memoryMB}MB");
-    })
-    .AddCheck("disk", () =>
-    {
-        try
-        {
-            var logsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "logs");
-            if (!Directory.Exists(logsDirectory))
-            {
-                Directory.CreateDirectory(logsDirectory);
-            }
-            
-            var drive = new DriveInfo(Path.GetPathRoot(logsDirectory) ?? "/");
-            var freeSpaceGB = drive.AvailableFreeSpace / (1024.0 * 1024.0 * 1024.0);
-            var totalSpaceGB = drive.TotalSize / (1024.0 * 1024.0 * 1024.0);
-            
-            if (freeSpaceGB < 1.0) // Less than 1GB free
-            {
-                return HealthCheckResult.Unhealthy($"Low disk space: {freeSpaceGB:F2}GB free of {totalSpaceGB:F2}GB");
-            }
-            
-            return HealthCheckResult.Healthy($"Disk space: {freeSpaceGB:F2}GB free of {totalSpaceGB:F2}GB");
-        }
-        catch (Exception ex)
-        {
-            return HealthCheckResult.Degraded($"Unable to check disk space: {ex.Message}");
-        }
-    });
+        timeout: TimeSpan.FromSeconds(15));
 
 // Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt");

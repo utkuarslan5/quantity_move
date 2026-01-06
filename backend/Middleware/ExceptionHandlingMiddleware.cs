@@ -41,7 +41,7 @@ public class ExceptionHandlingMiddleware
             
             // Capture request body if available
             string? requestBody = null;
-            if (context.Request.Method != "GET" && context.Request.Method != "HEAD" && context.Request.ContentLength > 0)
+            if (context.Request.Method != "GET" && context.Request.Method != "HEAD" && context.Request.ContentLength.HasValue && context.Request.ContentLength.Value > 0)
             {
                 try
                 {
